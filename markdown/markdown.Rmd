@@ -105,7 +105,7 @@ ggplot(education, aes(x=education.names, y=percent, fill=education.names)) +
            y='Percent')
 ```
 
-<img src="C:\\Users\\Brian\\Desktop\\GradClasses\\Spring18\\607\\607project3\\scripts\\burthworks_study_education_levels.PNG">
+<img src="https://raw.githubusercontent.com/brian-cuny/607project3/master/scripts/burthworks_study_education_levels.PNG">
  
 ```{r,echo=FALSE}
 majors <- chooseOne('MajorSelect') %>% 
@@ -134,7 +134,7 @@ ggplot(our_gender_data, aes(x = GenderSelect,y=percent, fill = GenderSelect)) +
        y='Percent')
 ```
 
-<img src="C:\\Users\\Brian\\Desktop\\GradClasses\\Spring18\\607\\607project3\\scripts\\burthworks_study_gender_demographics.PNG">
+<img src="https://raw.githubusercontent.com/brian-cuny/607project3/master/scripts/burthworks_study_gender_demographics.PNG">
 
 ```{r,echo=FALSE}
 our_age<- create_breaks(exp_df$Age,c(1,22.1, 28.1,35.1,41.1,49.1,56.1,Inf ),c("18-22", "23-30", "31-38", "39-46 ", "47-54 ", "55-62","62+"))
