@@ -537,6 +537,105 @@ ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill 
 
 ### Work Challenges: Albert
 
+This subset of the data addresses the challenges faced by Data Scientists, and how their time is typically spent at work. 
+
+The Data Scientists were asked to select the challenges (from a predefined list) they encounter at work. They also indicated the frequency (from a predefined list) at which these challenges were faced.
+Responders were also asked to indicate the ratio of time spent performing key Data Science tasks including data gathering, model building, production, visualizing, finding insiights, and `other`.
+
+## Tidy & Transform
+
+** Create `challenges` table to store challenges faced by each Data Scientist **
+
+```{r}
+# Create table to store challenges in long format
+challenges <- raw.data %>% 
+  select(id, "WorkChallengesSelect") %>% 
+  cSplit("WorkChallengesSelect", sep = ",", direction = "long") # split cells containing comma delimited values into rows
+```
+
+
+** Create `challenges.frequency` table to store the frequency at which these challenges were faced **
+
+```{r}
+# Create table in long format
+challenges.frequency <- raw.data %>%  
+  select(id, starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
+  gather("WorkChallengeFrequency", "Frequency", -id )
+```
+
+
+** Create `time.spent` table to store the distribution of time spent **
+
+```{r}
+# Create table in long format
+time.spent <- raw.data %>%  
+  select(id, starts_with("Time"), - TimeSpentStudying) %>%
+  gather("Activity", "Time", -id )
+```
+
+** Create CSVs for database import **
+
+```{r}
+# Create CSV for `challenges` table
+write.csv(challenges, file = "../tidied_csv/challenges.csv", row.names = FALSE, quote = FALSE)
+
+# Create CSV for `challenges.frequency` table
+write.csv(challenges.frequency, file = "../tidied_csv/challenges.frequency.csv", row.names = FALSE, quote = FALSE)
+
+# Create CSVs for `time.spent` table
+write.csv(time.spent, file = "../tidied_csv/time.spent.csv", row.names = FALSE, quote = FALSE)
+```
+
+## Analysis
+
+**Distribution of time spent**
+```{r}
+# Plot: Distribution of Time Spent
+filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>% 
+  mutate(`Time` = as.integer(`Time`)) %>% 
+  group_by(`Activity`) %>% 
+  summarise(`Time`= round(mean(`Time`), digits = 2)) %>% 
+    ggplot(aes(x = Activity, y = Time,fill=Activity, label = `Time`) ) + 
+      geom_bar(stat = "identity", show.legend = F) + 
+      geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
+      coord_flip() +  
+      labs(title = "Distribution of Time Spent")
+```
+
+**Below is a quick reference to the meaning of each activity in the plot.**
+
+TimeGatheringData -> Gathering and cleaning data
+TimeModelBuilding -> Model building/model selection
+TimeProduction -> Putting your work into production
+TimeVisualizing -> Visualizing data
+TimeFindingInsights -> Finding insights in the data and communicating these to relevant stakeholders
+TimeOtherSelect -> Other
+
+The plot shows that Data Scientists spend majority of their time cleaning and gathering data, and selecting/building models. 
+These two activities account for over 58% of Data Scientists time on average. Preparing visualizations and finding and communicating insights accounts for 27% of the Data Scientists time, when grouping these relevant activities. This is evidence that **soft skills** play a key role for Data Scientists.
+
+```{r}
+# Plot: Challenges at Work
+  ggplot(data = challenges, aes(challenges$WorkChallengesSelect,fill=WorkChallengesSelect)) + 
+  geom_histogram( stat='count', show.legend = F ) + 
+  coord_flip() +  
+  labs( title = "Challenges at Work", x = "Challenges", y = "Count" )
+```
+
+```{r}
+# Frequency of Workplace Challenges
+  filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
+  group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
+  summarise(`Count`= n()) %>% 
+  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) ) %>% 
+  factor( `Frequency`, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") ) 
+  ggplot(c,aes( x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
+  geom_bar( stat = "identity" ) + 
+  geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
+  coord_flip() +  
+  scale_fill_brewer(palette = 'RdYlBu') + 
+  labs( title = "Frequency of Workplace Challenges", x = "Challenge", y = "Frequency" )
+```
 
 ### Conclusion (writing to csv/importing to sql?)
 
