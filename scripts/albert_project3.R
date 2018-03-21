@@ -49,19 +49,25 @@ filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>%
   labs(title = "Distribution of Time Spent")
 
 # Plot: Challenges at Work
-  ggplot(data = challenges, aes(challenges$WorkChallengesSelect,fill=WorkChallengesSelect)) + 
-  geom_histogram( stat='count', show.legend = F ) + 
+challenges %>%
+  filter(!is.na(`WorkChallengesSelect`)) %>% 
+  group_by( `WorkChallengesSelect` ) %>%
+  summarise( Count = n() ) %>%
+  mutate(Ratio = Count/n()) %>%
+  ggplot(aes(x = reorder(WorkChallengesSelect, Ratio), y = Ratio, fill=WorkChallengesSelect, label = `Ratio`)) + 
+  geom_histogram( stat='identity', show.legend = F ) + 
   coord_flip() +  
   labs( title = "Challenges at Work", x = "Challenges", y = "Count" )
   
 
 # Frequency of Workplace Challenges
-  filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
+freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
   group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
   summarise(`Count`= n()) %>% 
-  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) ) %>% 
-  factor( `Frequency`, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") ) 
-  ggplot(c,aes( x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
+  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) )
+freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") )
+
+ggplot(freq.data, aes(x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
   geom_bar( stat = "identity" ) + 
   geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
   coord_flip() +  

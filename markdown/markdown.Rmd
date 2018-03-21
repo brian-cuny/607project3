@@ -595,11 +595,11 @@ filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>%
   mutate(`Time` = as.integer(`Time`)) %>% 
   group_by(`Activity`) %>% 
   summarise(`Time`= round(mean(`Time`), digits = 2)) %>% 
-    ggplot(aes(x = Activity, y = Time,fill=Activity, label = `Time`) ) + 
+    ggplot(aes( x = reorder(Activity, Time), y = Time,fill=Activity, label = `Time`) ) + 
       geom_bar(stat = "identity", show.legend = F) + 
       geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
       coord_flip() +  
-      labs(title = "Distribution of Time Spent")
+      labs(title = "Distribution of Time Spent", x = "Activity")
 ```
 
 **Below is a quick reference to the meaning of each activity in the plot.**
@@ -612,24 +612,34 @@ TimeFindingInsights -> Finding insights in the data and communicating these to r
 TimeOtherSelect -> Other
 
 The plot shows that Data Scientists spend majority of their time cleaning and gathering data, and selecting/building models. 
-These two activities account for over 58% of Data Scientists time on average. Preparing visualizations and finding and communicating insights accounts for 27% of the Data Scientists time, when grouping these relevant activities. This is evidence that **soft skills** play a key role for Data Scientists.
+These two activities account for over 58% of Data Scientists time on average. Preparing visualizations and finding and communicating insights accounts for 27% of the Data Scientists time, when grouping these relevant activities. This is evidence that **soft skills** play a key role for Data Scientists. 
+
 
 ```{r}
 # Plot: Challenges at Work
-  ggplot(data = challenges, aes(challenges$WorkChallengesSelect,fill=WorkChallengesSelect)) + 
-  geom_histogram( stat='count', show.legend = F ) + 
+challenges %>%
+  filter(!is.na(`WorkChallengesSelect`)) %>% 
+  group_by( `WorkChallengesSelect` ) %>%
+  summarise( Count = n() ) %>%
+  mutate(Ratio = Count / n()) %>%
+  ggplot(aes(x = reorder(WorkChallengesSelect, Ratio), y = Ratio,  fill=WorkChallengesSelect, label = `Ratio`)) + 
+  geom_histogram( stat='identity', show.legend = F ) + 
   coord_flip() +  
   labs( title = "Challenges at Work", x = "Challenges", y = "Count" )
 ```
 
+The plot shows that 
+
+
 ```{r}
 # Frequency of Workplace Challenges
-  filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
+freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
   group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
   summarise(`Count`= n()) %>% 
-  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) ) %>% 
-  factor( `Frequency`, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") ) 
-  ggplot(c,aes( x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
+  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) )
+freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") )
+  
+  ggplot(freq.data, aes(x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
   geom_bar( stat = "identity" ) + 
   geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
   coord_flip() +  
