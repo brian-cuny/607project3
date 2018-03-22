@@ -1,7 +1,4 @@
 ---
-title: "project3"
-author: "group1"
-date: "March 16, 2018"
 output:
   html_document:
     theme: cerulean
@@ -20,7 +17,12 @@ library(knitr)
 library(kableExtra)
 ```
 
-## Our Project {.tabset}
+<div class='jumbotron'>
+  <h3 class='display-3 text-uppercase'>What are the Most Valued Data Science Skills?</h3>
+  <h4 class='right text-uppercase'>By Meaghan, Albert, Hovig, Justin, Rose and Brian</h4>
+  <div class='clearfix'></div>
+  <h5 class='right text-uppercase'>March 25, 2018</h5>
+</div>
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
 raw.data <- read_csv('https://raw.githubusercontent.com/brian-cuny/607project3/master/multipleChoiceResponses.csv', na=c('', 'NA')) %>%
@@ -28,9 +30,24 @@ raw.data <- read_csv('https://raw.githubusercontent.com/brian-cuny/607project3/m
   rowid_to_column('id')
 ```
 
-### Profile of a Data Scientist: Justin
+## {.tabset}
 
-Credit to Amber Thomas for providing the following code used for extracting and summarizing answer to multiple-choice questions.
+### Introduction
+
+<h2>Kaggle ML and Data Science Survey, 2017</h2>
+
+<div class='well'>
+5 months ago Kaggle, a website that offers competitions to teams of data scientists for cash prizes, released their annual user [survey](https://www.kaggle.com/kaggle/kaggle-survey-2017/data). This comprehensive survey asked numerous questions to the Kaggle members in order to collect metrics on it's user base. Our group selected this data to serve as our data set for determining the top hard and soft skills required for a data scientist.
+
+Breakdown:
+
+* Nearly 3000 observations from a larger raw set of nearly 16000 observations subset to find working data scientists.
+* More than 200 questions on a variety of topics.
+</div>
+
+<div class='well'>
+Credit to Amber Thomas for providing the following code used for extracting and summarizing answers to multiple-choice questions.
+</div>
 
 ```{r}
 chooseOne = function(question){
@@ -76,15 +93,20 @@ create_breaks <- function(dfcolumn,breaks,labels){
 }
 ```
 
+### Profile of a Data Scientist
+
 <h2>Data Scientist Demographics</h2>
 
+<div class='well'>
 INTRODUCTION HERE
+</div>
 
 ```{r pressure, warning=FALSE, message=FALSE, echo=FALSE}
 exp_df <- raw.data%>%
     select(c(1:5,10,11,59,12,56,57,58,60,70,71,72,73,74,75,76,207,208,209))
 ```
 
+<div class='col-left'>
 ```{r, echo=FALSE}
 education <- chooseOne('FormalEducation')
 other_count <- sum(education[4:7,]$count)
@@ -106,23 +128,13 @@ ggplot(education, aes(x=education.names, y=percent, fill=education.names)) +
            x='Highest Education Earned',
            y='Percent')
 ```
+</div>
 
+<div class='col-right'>
 <img src="https://raw.githubusercontent.com/brian-cuny/607project3/master/scripts/burthworks_study_education_levels.PNG">
- 
-```{r,echo=FALSE}
-majors <- chooseOne('MajorSelect') %>% 
-  arrange(.,desc(percent))
-majors[7,1] <- c("IT")
-majors$MajorSelect <- factor(majors$MajorSelect, levels = majors$MajorSelect)
-ggplot(majors, aes(x = MajorSelect,y=percent, fill = MajorSelect)) + 
-      geom_bar(stat="identity") +
-      theme(legend.position="none") +
-      coord_flip() + 
-      labs(title='Most Data Scientists come from a STEM Background',
-           x='Major', 
-           y='Percent')
-```
+</div>
 
+<div class='col-left'>
 ```{r,echo=FALSE}
 our_gender_data <- chooseOne('GenderSelect')
 our_gender_data <-  our_gender_data %>% 
@@ -135,26 +147,13 @@ ggplot(our_gender_data, aes(x = GenderSelect,y=percent, fill = GenderSelect)) +
        x='Gender',
        y='Percent')
 ```
+</div>
 
+<div class='col-right'>
 <img src="https://raw.githubusercontent.com/brian-cuny/607project3/master/scripts/burthworks_study_gender_demographics.PNG">
+</div>
 
-```{r,echo=FALSE}
-our_age<- create_breaks(exp_df$Age,c(1,22.1, 28.1,35.1,41.1,49.1,56.1,Inf ),c("18-22", "23-30", "31-38", "39-46 ", "47-54 ", "55-62","62+"))
-exp_df["age_groups"] <-our_age 
-chosen_age <- chooseOne('age_groups')
-chosen_age <- chosen_age %>% 
-    arrange(.,age_groups)
-
-ggplot(chosen_age, aes(x = age_groups,y=percent, fill = age_groups)) + 
-  geom_bar(stat="identity") +
-  scale_fill_brewer(palette='Set1') + 
-  theme(legend.position="none") + 
-  labs(title='Data Scientists are Younger than the Average Worker',
-       x='Age Group',
-       y='Percent')
-```
-
-```{r,echo=FALSE}
+```{r, echo=FALSE}
 burtchworks_tenure <- (c('0-5'=150,'6-10'=120,'11-15'=75,"16-20"=25,"21-25"=22,"26-30"=2,"31+"=1))
 
 percent_Burtch_works <- proportion_function(burtchworks_tenure) 
@@ -169,17 +168,6 @@ my_tenure <- chooseOne("Tenure")
 my_tenure$Tenure=c("3-5 Years","10+ Years","1-2 Years","6-10 Years", "< 1 Year", "Doesn't write code")
 my_tenure$Tenures <- factor(my_tenure$Tenure, levels = my_tenure$Tenure)
 
-ggplot(my_tenure, aes(x = Tenures,y=percent, fill = Tenures)) + 
-      geom_bar(stat="identity")+
-      scale_x_discrete("Tenures", limits=c( "< 1 Year","1-2 Years","3-5 Years","6-10 Years","10+ Years", "Doesn't write code")) +
-      theme(legend.position="none") +
-      scale_fill_brewer(palette='Set2') + 
-      labs(title='Most Data Scientists are New to the Field',
-           x='Tenure',
-           y='Percent')
-```
-
-```{r, echo=FALSE}
 percent_burchwood_tenure<- sum(as.numeric(burtchworks_tenure_df[3:7,]$percent_Burtch_works))
 burchwood_tenure_N <-  sum(as.numeric(burtchworks_tenure_df[3:7,]$burtchworks_tenure))
 extra_row <- c(burchwood_tenure_N,percent_burchwood_tenure," 10 + Years")
@@ -207,6 +195,36 @@ ggplot(combined.data, aes(x=Tenure, y=percent %>% as.numeric() %>% plyr::round_a
          x='Tenure',
          y='Percent',
          fill='Data Set')
+```
+
+```{r,echo=FALSE}
+majors <- chooseOne('MajorSelect') %>% 
+  arrange(.,desc(percent))
+majors[7,1] <- c("IT")
+majors$MajorSelect <- factor(majors$MajorSelect, levels = majors$MajorSelect)
+ggplot(majors, aes(x = MajorSelect,y=percent, fill = MajorSelect)) + 
+      geom_bar(stat="identity") +
+      theme(legend.position="none") +
+      coord_flip() + 
+      labs(title='Most Data Scientists come from a STEM Background',
+           x='Major', 
+           y='Percent')
+```
+
+```{r,echo=FALSE}
+our_age<- create_breaks(exp_df$Age,c(1,22.1, 28.1,35.1,41.1,49.1,56.1,Inf ),c("18-22", "23-30", "31-38", "39-46 ", "47-54 ", "55-62","62+"))
+exp_df["age_groups"] <-our_age 
+chosen_age <- chooseOne('age_groups')
+chosen_age <- chosen_age %>% 
+    arrange(.,age_groups)
+
+ggplot(chosen_age, aes(x = age_groups,y=percent, fill = age_groups)) + 
+  geom_bar(stat="identity") +
+  scale_fill_brewer(palette='Set1') + 
+  theme(legend.position="none") + 
+  labs(title='Data Scientists are Younger than the Average Worker',
+       x='Age Group',
+       y='Percent')
 ```
 
 ```{r, echo=FALSE}
@@ -244,17 +262,30 @@ ggplot(us_money, aes(x=groups, y=percent, fill=groups)) +
            )
 ```
 
+<div class='well'>
 CONCLUSION
+</div>
 
-### Learning Platform Usefulness: Hovig
+### Learning Platform Usefulness
+
+<h2>Usefulness of Various Learning Platforms</h2>
+
+<div class='well'>
+INTRODUCTION
+</div>
 
 
+<div class='well'>
+CONCLUSION
+</div>
 
-### Learning Categories: Brian
+### Learning Categories
 
 <h2>How Data Scientists Learned Their Core Skills</h2>
 
-In this section, we examine how data scientists gained their skill set. 
+<div class='well'>
+In this section, we examine how data scientists gained their skill set. We believe there may be valuable insight in what makes a strong data scientist by examing how successful data scientists gained their skill set.
+</div>
 
 ```{r echo=FALSE}
 tidy.names <- names(raw.data)[61:66] %>% 
@@ -307,15 +338,19 @@ ggplot(tidy.data) +
   )
 ```
 
-Our data shows a great diversity in learning styles. This indicates that not only do data scientists learn from a variety of sources, but every data scientist's sources vary in importance. This highlights the idea that there is not right or wrong way to learn to become a data scientist. At the same time, as the four major categories amount for nearly 100% of education, this means that there are no "secret" learning sources.
+<div class='well'>
+Our data shows a great diversity in learning styles. This indicates that not only do data scientists learn from a variety of sources, but every data scientist's sources vary in importance. This highlights the idea that there is no right or wrong way to learn to become a data scientist. At the same time, as the four major categories amount for nearly 100% of education, this means that there are no "secret" learning sources.
 
 It is interested to note that nearly 75% of data scientists indicate they learned while on the job. 
+</div>
 
-### Common Job Algorithms: Rose
+### Common Job Algorithms
 
 <h2>Common Alogrithms and Methods Used by Data Scientists</h2>
 
+<div class='well'>
 INTRODUCTION
+</div>
 
 ```{r echo=FALSE}
 data.rose <- raw.data %>%
@@ -416,13 +451,17 @@ ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), cou
        y = "Count")
 ```
 
+<div class='well'>
 CONCLUSION
+</div>
 
-### Work Tools Freqeuncy: Meaghan
+### Work Tools Freqeuncy
 
 <h2>Frequency of Use for Various Tools by Data Scientists</h2>
 
+<div class='well'>
 INTRODUCTION
+</div>
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 tidy.names <- names(raw.data)[83:132]%>% 
@@ -510,13 +549,17 @@ ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill 
                                    hjust = 1))
 ```
 
+<div class='well'>
 CONCLUSION
+</div>
 
-### Work Challenges: Albert
+### Work Challenges
 
 <h2>Challenges Faced by Data Scientists</h2>
 
+<div class='well'>
 In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work. 
+</div>
 
 ```{r, echo=FALSE}
 challenges <- raw.data %>% 
@@ -595,42 +638,36 @@ challenges.frequency %>%
   labs( title = "Frequency of Workplace Challenges", x = "Challenge", y = "Frequency" )
 ```
 
+<div class='well'>
 CONCLUSION
+</div>
 
 ### Conclusion
 
 <h2>Skill List</h2>
 
+<h3>Data Scientists...</h3>
+
 HARD SKILLS
+
 1. List
 2. 
   
 SOFT SKILLS
-1. List
-2.   
+
+1. learn from diverse sources.
+2. continue to learn even after they have secured a job.
+
+<div class='well'>
+In conclusion...
+</div>
 
 <h2>SQL</h2>
 
+<div class='well'>
+The original kaggle data was in an untidy form. As part of data preparation we each created tidy data sub sets and saved them to a series of csv files stored on our [github](https://github.com/brian-cuny/607project3/tree/master/tidied_csv). The following SQL script will import them into a series of tables. We hope that this will aid future research and help to find connections that we may have missed.
+</div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{SQL}
+holding
+```
