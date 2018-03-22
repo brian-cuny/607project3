@@ -22,7 +22,7 @@ library(kableExtra)
 
 ## Our Project {.tabset}
 
-```{r, warning=FALSE, message=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
 raw.data <- read_csv('https://raw.githubusercontent.com/brian-cuny/607project3/master/multipleChoiceResponses.csv', na=c('', 'NA')) %>%
   subset(DataScienceIdentitySelect == 'Yes' & CodeWriter == 'Yes') %>%
   rowid_to_column('id')
@@ -76,14 +76,16 @@ create_breaks <- function(dfcolumn,breaks,labels){
 }
 ```
 
-The columns related to the demographics of this data was subset.
+<h2>Data Scientist Demographics</h2>
 
-```{r pressure, warning=FALSE, message=FALSE}
+INTRODUCTION HERE
+
+```{r pressure, warning=FALSE, message=FALSE, echo=FALSE}
 exp_df <- raw.data%>%
     select(c(1:5,10,11,59,12,56,57,58,60,70,71,72,73,74,75,76,207,208,209))
 ```
 
-```{r,echo=FALSE}
+```{r, echo=FALSE}
 education <- chooseOne('FormalEducation')
 other_count <- sum(education[4:7,]$count)
 other_percent <- sum(education[4:7,]$percent)
@@ -116,7 +118,7 @@ ggplot(majors, aes(x = MajorSelect,y=percent, fill = MajorSelect)) +
       geom_bar(stat="identity") +
       theme(legend.position="none") +
       coord_flip() + 
-      labs(title='Most Data Scietists come from a STEM Background',
+      labs(title='Most Data Scientists come from a STEM Background',
            x='Major', 
            y='Percent')
 ```
@@ -242,27 +244,26 @@ ggplot(us_money, aes(x=groups, y=percent, fill=groups)) +
            )
 ```
 
+CONCLUSION
+
 ### Learning Platform Usefulness: Hovig
 
 
 
 ### Learning Categories: Brian
 
-This subset of data examines how data scientists learned their core skill set. Each data scientist was asked to assign each category a percent from 0 to 100 indicating how much of their education was made up of this source.
+<h2>How Data Scientists Learned Their Core Skills</h2>
 
-First, a list of categories was extrated and formatted.
+In this section, we examine how data scientists gained their skill set. 
 
-```{r}
+```{r echo=FALSE}
 tidy.names <- names(raw.data)[61:66] %>% 
   str_extract('(?<=LearningCategory)(\\w+)') %>% 
   str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>% 
   tolower()
-tidy.names %>% kable()
 ```
 
-The data was tidied and the categories were converted to factors, to aid in analysis.
-
-```{r}
+```{r echo=FALSE}
 tidy.data <- raw.data %>%
   select(c(1, 61:66)) %>%
   setNames(c('id', tidy.names)) %>%
@@ -271,21 +272,15 @@ tidy.data <- raw.data %>%
 tidy.data$percent %<>% as.numeric()
 
 tidy.data$category %<>% factor(levels=tidy.names, ordered=TRUE)
-tidy.data %>% head(10) %>% kable()
 ```
 
-Summary statistics tell an intersting story. No source averaged more than 50% of the sets learning sources. This would seem to indicate that data scientists learn from a diverse set of sources. The 'other' category's mean is nearly 0 also indicating that the other categories account for nearly all learning sources. 
-
-```{r}
+```{r echo=FALSE}
 tidy.summary.data <- tidy.data %>% 
   group_by(category) %>% 
   summarise(avg=mean(percent), sd=sd(percent))
-tidy.summary.data %>% kable()
 ```
 
-The boxplots support the summary statistics. Each category has numerous upper ourliers indicating that data scientists who learned most or entirely from one source were rare.
-
-```{r}
+```{r echo=FALSE}
 ggplot(tidy.data) +
   geom_boxplot(aes(category, percent)) +
   xlim(tidy.names %>% rev()) +
@@ -296,9 +291,7 @@ ggplot(tidy.data) +
   )
 ```
 
-The final more clearly shows the diversity in learning styles. This indicates that not only do data scientists learn from a variety of sources, but every data scientist's sources vary in importance. This highlights the idea that there is not right or wrong way to learn to become a data scientist. At the same time, as the four major categories amount for nearly 100% of education, this means that there are no "secret" learning sources.
-
-```{r}
+```{r echo=FALSE}
 ggplot(tidy.data) +
   geom_bar(aes(category, fill=percent %>% 
                                 round_any(10) %>% 
@@ -314,13 +307,17 @@ ggplot(tidy.data) +
   )
 ```
 
+Our data shows a great diversity in learning styles. This indicates that not only do data scientists learn from a variety of sources, but every data scientist's sources vary in importance. This highlights the idea that there is not right or wrong way to learn to become a data scientist. At the same time, as the four major categories amount for nearly 100% of education, this means that there are no "secret" learning sources.
+
+It is interested to note that nearly 75% of data scientists indicate they learned while on the job. 
+
 ### Common Job Algorithms: Rose
 
-This subset of data examines common algorithms and methods used by data scientists.
+<h2>Common Alogrithms and Methods Used by Data Scientists</h2>
 
-First, the proper data is subset.
+INTRODUCTION
 
-```{r}
+```{r echo=FALSE}
 data.rose <- raw.data %>%
   select(c(1, 80:81, 134:167))
 
@@ -334,21 +331,16 @@ melt.dt <- data.rose %>%
   gather('WorkMethodsFrequency', 'Frequency', 5:37)
 ```
 
-The data on commonly used algorithms was seperated into it's own table.
-
-```{r}
+```{r echo=FALSE}
 alg.select <- melt.dt %>%
   select(c('id', 'WorkAlgorithmsSelect'))
 alg.select.list <- alg.select$WorkAlgorithmsSelect %>%
   strsplit(split = ",")
 alg.select.dt <- tibble(id = rep(alg.select$id, sapply(alg.select.list, length)), 
                             algorithm = unlist(alg.select.list))
-alg.select.dt %>% head(10) %>% kable()
 ```
 
-The data on commonly used method was seperated into it's own table.
-
-```{r}
+```{r echo=FALSE}
 method.select <- melt.dt %>%
   select(c('id', 'WorkMethodsSelect'))
 method.select.list <- method.select$WorkMethodsSelect %>%
@@ -356,18 +348,14 @@ method.select.list <- method.select$WorkMethodsSelect %>%
   strsplit(split = ",")
 method.select.dt <- tibble(id = rep(method.select$id, sapply(method.select.list, length)), 
                                method = unlist(method.select.list))
-method.select.dt %>% head(10) %>% kable()
 ```
 
-Finally, the data on fequency of each method was seperated into it's own table.
-
-```{r}
+```{r echo=FALSE}
 freq.dt <- melt.dt %>%
   select(c('id', 'WorkDatasetSize', 'WorkMethodsFrequency', 'Frequency'))
-freq.dt %>% head(10) %>% kable()
 ```
 
-```{r}
+```{r echo=FALSE}
 alg.select.dt <- as.data.table(alg.select.dt)
 alg.total <- nrow(na.omit(alg.select.dt))
 alg.vis <- na.omit(alg.select.dt)[, .(count = length(id)), by = .(algorithm)][order(-count)]
@@ -383,7 +371,7 @@ ggplot(alg.vis, aes(reorder(algorithm, count), count, fill = algorithm)) +
        y = "Proportion") 
 ```
 
-```{r}
+```{r echo=FALSE}
 method.select.dt <- as.data.table(method.select.dt)
 method.total <- nrow(na.omit(method.select.dt))
 method.vis <- na.omit(method.select.dt)[, .(count = length(id)), by = .(method)][order(-count)]
@@ -399,7 +387,7 @@ ggplot(method.vis, aes(reorder(method, count), count, fill = method)) +
        y = "Proportion") 
 ```
 
-```{r}
+```{r echo=FALSE}
 freq.dt <- as.data.table(freq.dt)
 freq.dt <- freq.dt[, .(count = .N), by = .(Frequency, WorkMethodsFrequency,WorkDatasetSize)]
 method.freq <- freq.dt[, .(count = sum(count)), by = .(WorkMethodsFrequency, Frequency)][order(-count)]
@@ -416,7 +404,7 @@ ggplot(na.omit(size.freq), aes(reorder(WorkDatasetSize, count), count, fill = Wo
        y = "Count")
 ```
 
-```{r, fig.height=8}
+```{r, fig.height=8, echo=FALSE}
 ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), count, fill = WorkMethodsFrequency)) +
   guides(fill=FALSE) +
   geom_bar(stat = 'identity') +
@@ -428,11 +416,15 @@ ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), cou
        y = "Count")
 ```
 
+CONCLUSION
+
 ### Work Tools Freqeuncy: Meaghan
 
-The data was very untidy and expanded into two columns passed the "WorkToolsSelect" column. I brought in the 3 columns and replaced elements to ensure a easy split 
+<h2>Frequency of Use for Various Tools by Data Scientists</h2>
 
-```{r message=FALSE, warning=FALSE}
+INTRODUCTION
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 tidy.names <- names(raw.data)[83:132]%>% 
   str_extract('(?<=WorkToolsFrequency)(\\w+)') %>% 
   str_replace_all('(?<=[a-z])([A-Z])', '_\\1') 
@@ -447,9 +439,7 @@ tools.data <- raw.data %>%
 tools.data <- cSplit(tools.data, 'tool_used', ',')
 ```
 
-I used the gather function to reformat the table
-
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 id.tool.df <- tools.data %>%
   gather(tool_group, tool, names(tools.data)[3:63])%>%
   group_by(id, tool)%>%
@@ -457,12 +447,9 @@ id.tool.df <- tools.data %>%
   drop_na()%>%
   filter(!tool %in% c("Rarely", "Often",
                       "Sometimes", "Most of the time"))
-id.tool.df %>% head(10) %>% kable()
 ```
 
-I created a summary table representing the frequency of each response.
-
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 summary.tool.df <- tools.data %>%
   gather(tool_group, tool, names(tools.data)[3:63])%>%
   group_by(tool)%>%
@@ -472,12 +459,9 @@ summary.tool.df <- tools.data %>%
   filter(!tool %in% c("Rarely", "Often",
                       "Sometimes", "Most of the time"))%>%
   mutate(percent_total = round((sum_tool/ sum(sum_tool))*100,digits = 2))
-summary.tool.df %>% head(10) %>% kable()
 ```
 
-This plot shows the top data science skills given the filters used.
-
-```{r }
+```{r echo=FALSE}
 ggplot(head(summary.tool.df,15), aes(x=reorder(tool, -sum_tool), y=percent_total)) + 
   geom_bar(stat="identity", width=.5, fill="tomato3") +
   geom_text(aes(label=percent_total))+
@@ -488,9 +472,7 @@ ggplot(head(summary.tool.df,15), aes(x=reorder(tool, -sum_tool), y=percent_total
   theme(axis.text.x = element_text(angle=65, vjust=0.6))
 ```
 
-A data frame of tool frequency by id was created.
-
-```{r}
+```{r, echo=FALSE}
 frequency.data <- raw.data %>%
   select(c(1, 83:132)) %>%
   setNames(c('id', tidy.names))
@@ -500,12 +482,9 @@ id.frquency.table <-frequency.data %>%
   filter(frequency_id %in% c("Rarely", "Often",
                              "Sometimes", "Most of the time"))%>%
   arrange(id)
-id.frquency.table %>% head(10) %>% kable()
 ```
 
-I grouped the frequency information by the actual tool name & response 
-
-```{r}
+```{r, echo=FALSE}
 summary.frquency.table <- frequency.data %>% 
   gather(tool_name, frequency_id, names(frequency.data)[2:51])%>%
   filter(frequency_id %in% c("Rarely", "Often",
@@ -514,18 +493,16 @@ summary.frquency.table <- frequency.data %>%
   group_by(tool_name,frequency_id)%>%
   summarise(sum_feq = sum(freq_counter))%>%
   arrange(desc(sum_feq))
-summary.frquency.table %>% head(10) %>% kable()
 ```
 
-The plot shows frequency of use of top technologies.
-
-```{r}
+```{r, echo=FALSE}
 ordering <- c('Most of the time', 'Often', 'Sometimes', 'Rarely')
 
 ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill = tool_name)) + 
   geom_bar(stat = "identity") + 
   facet_wrap(~tool_name) + 
   ylab("Number of times a response was selected") + 
+  xlab('') + 
   xlim(ordering) +
   theme(legend.position="none") +
   theme(axis.text.x = element_text(angle = 90, 
@@ -533,112 +510,106 @@ ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill 
                                    hjust = 1))
 ```
 
-
+CONCLUSION
 
 ### Work Challenges: Albert
 
-This subset of the data addresses the challenges faced by Data Scientists, and how their time is typically spent at work. 
+<h2>Challenges Faced by Data Scientists</h2>
 
-The Data Scientists were asked to select the challenges (from a predefined list) they encounter at work. They also indicated the frequency (from a predefined list) at which these challenges were faced.
-Responders were also asked to indicate the ratio of time spent performing key Data Science tasks including data gathering, model building, production, visualizing, finding insiights, and `other`.
+In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work. 
 
-## Tidy & Transform
-
-** Create `challenges` table to store challenges faced by each Data Scientist **
-
-```{r}
-# Create table to store challenges in long format
+```{r, echo=FALSE}
 challenges <- raw.data %>% 
   select(id, "WorkChallengesSelect") %>% 
-  cSplit("WorkChallengesSelect", sep = ",", direction = "long") # split cells containing comma delimited values into rows
+  cSplit("WorkChallengesSelect", sep = ",", direction = "long")
 ```
 
+```{r, echo=FALSE}
+challenges.names <- raw.data %>%
+  select(starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
+  names() %>%
+  str_extract('(?<=WorkChallengeFrequency)(\\w+)') %>% 
+  str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
+  tolower()
 
-** Create `challenges.frequency` table to store the frequency at which these challenges were faced **
-
-```{r}
-# Create table in long format
 challenges.frequency <- raw.data %>%  
   select(id, starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
+  setNames(c('id', challenges.names)) %>%
   gather("WorkChallengeFrequency", "Frequency", -id )
 ```
 
+```{r, echo=FALSE}
+time.names <- raw.data %>%
+  select(starts_with("Time"), - TimeSpentStudying) %>%
+  names() %>%
+  str_extract('(?<=Time)(\\w+)') %>% 
+  str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
+  tolower()
 
-** Create `time.spent` table to store the distribution of time spent **
-
-```{r}
-# Create table in long format
 time.spent <- raw.data %>%  
   select(id, starts_with("Time"), - TimeSpentStudying) %>%
+  setNames(c('id', time.names)) %>%
   gather("Activity", "Time", -id )
 ```
 
-** Create CSVs for database import **
-
-```{r}
-# Create CSV for `challenges` table
-write.csv(challenges, file = "../tidied_csv/challenges.csv", row.names = FALSE, quote = FALSE)
-
-# Create CSV for `challenges.frequency` table
-write.csv(challenges.frequency, file = "../tidied_csv/challenges.frequency.csv", row.names = FALSE, quote = FALSE)
-
-# Create CSVs for `time.spent` table
-write.csv(time.spent, file = "../tidied_csv/time.spent.csv", row.names = FALSE, quote = FALSE)
-```
-
-## Analysis
-
-**Distribution of time spent**
-```{r}
-# Plot: Distribution of Time Spent
-filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>% 
+```{r echo=FALSE}
+time.spent %>% 
+  filter(!is.na(`Time`), `Time` != 'NA') %>% 
   mutate(`Time` = as.integer(`Time`)) %>% 
   group_by(`Activity`) %>% 
   summarise(`Time`= round(mean(`Time`), digits = 2)) %>% 
-    ggplot(aes(x = Activity, y = Time,fill=Activity, label = `Time`) ) + 
-      geom_bar(stat = "identity", show.legend = F) + 
-      geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
-      coord_flip() +  
-      labs(title = "Distribution of Time Spent")
+  ggplot(aes(x = reorder(Activity, Time), y = Time,fill=Activity, label = `Time`) ) + 
+    geom_bar(stat = "identity", show.legend = F) + 
+    geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
+    coord_flip() +  
+    labs(title = "Most Time is Spent Organizing Data",
+         x='Activity')
 ```
 
-**Below is a quick reference to the meaning of each activity in the plot.**
-
-TimeGatheringData -> Gathering and cleaning data
-TimeModelBuilding -> Model building/model selection
-TimeProduction -> Putting your work into production
-TimeVisualizing -> Visualizing data
-TimeFindingInsights -> Finding insights in the data and communicating these to relevant stakeholders
-TimeOtherSelect -> Other
-
-The plot shows that Data Scientists spend majority of their time cleaning and gathering data, and selecting/building models. 
-These two activities account for over 58% of Data Scientists time on average. Preparing visualizations and finding and communicating insights accounts for 27% of the Data Scientists time, when grouping these relevant activities. This is evidence that **soft skills** play a key role for Data Scientists.
-
-```{r}
-# Plot: Challenges at Work
-  ggplot(data = challenges, aes(challenges$WorkChallengesSelect,fill=WorkChallengesSelect)) + 
-  geom_histogram( stat='count', show.legend = F ) + 
-  coord_flip() +  
-  labs( title = "Challenges at Work", x = "Challenges", y = "Count" )
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10}
+challenges %>%
+  ggplot(aes(fct_infreq(WorkChallengesSelect), fill=WorkChallengesSelect)) + 
+  geom_bar() +
+  coord_flip() + 
+  scale_color_brewer(palette='YlOrRd') + 
+  guides(fill=FALSE) + 
+  labs( title = "Data Scientists Face Diverse Challenges", 
+          x = "Challenges", 
+          y = "Frequency"
+        )
 ```
 
-```{r}
-# Frequency of Workplace Challenges
-  filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
+```{r echo=FALSE}
+challenges.frequency %>%  
+  filter(!is.na(`Frequency`) ) %>% 
   group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
   summarise(`Count`= n()) %>% 
-  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) ) %>% 
-  factor( `Frequency`, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") ) 
-  ggplot(c,aes( x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
-  geom_bar( stat = "identity" ) + 
+  mutate(Frequency = factor(Frequency, levels=c('Rarely', 'Sometimes', 'Often', 'Most of the time')),
+         `Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) 
+         ) %>%
+  ggplot(aes(x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
+  geom_bar(stat = "identity") + 
   geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
   coord_flip() +  
-  scale_fill_brewer(palette = 'RdYlBu') + 
+  scale_fill_brewer(palette = 'YlOrRd') + 
   labs( title = "Frequency of Workplace Challenges", x = "Challenge", y = "Frequency" )
 ```
 
-### Conclusion (writing to csv/importing to sql?)
+CONCLUSION
 
+### Conclusion
+
+<h2>Skill List</h2>
+
+HARD SKILLS
+1. List
+2. 
+  
+SOFT SKILLS
+1. List
+2.   
+
+<h2>SQL</h2>
 
 
 

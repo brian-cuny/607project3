@@ -6521,7 +6521,7 @@ id,Activity,Time
 730,TimeProduction,10
 731,TimeProduction,0
 732,TimeProduction,0
-733,TimeProduction,2.5
+733,TimeProduction,NA
 734,TimeProduction,5
 735,TimeProduction,10
 736,TimeProduction,10
@@ -7154,7 +7154,7 @@ id,Activity,Time
 1363,TimeProduction,15
 1364,TimeProduction,0
 1365,TimeProduction,20
-1366,TimeProduction,2.5
+1366,TimeProduction,NA
 1367,TimeProduction,15
 1368,TimeProduction,15
 1369,TimeProduction,5
@@ -9416,7 +9416,7 @@ id,Activity,Time
 730,TimeVisualizing,20
 731,TimeVisualizing,20
 732,TimeVisualizing,25
-733,TimeVisualizing,2.5
+733,TimeVisualizing,NA
 734,TimeVisualizing,5
 735,TimeVisualizing,30
 736,TimeVisualizing,10
@@ -9444,7 +9444,7 @@ id,Activity,Time
 758,TimeVisualizing,8
 759,TimeVisualizing,0
 760,TimeVisualizing,20
-761,TimeVisualizing,2.5
+761,TimeVisualizing,NA
 762,TimeVisualizing,5
 763,TimeVisualizing,20
 764,TimeVisualizing,20
@@ -10049,7 +10049,7 @@ id,Activity,Time
 1363,TimeVisualizing,20
 1364,TimeVisualizing,5
 1365,TimeVisualizing,5
-1366,TimeVisualizing,2.5
+1366,TimeVisualizing,NA
 1367,TimeVisualizing,20
 1368,TimeVisualizing,30
 1369,TimeVisualizing,5
@@ -12339,7 +12339,7 @@ id,Activity,Time
 758,TimeFindingInsights,15
 759,TimeFindingInsights,0
 760,TimeFindingInsights,5
-761,TimeFindingInsights,2.5
+761,TimeFindingInsights,NA
 762,TimeFindingInsights,20
 763,TimeFindingInsights,20
 764,TimeFindingInsights,10
