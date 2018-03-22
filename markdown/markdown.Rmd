@@ -537,10 +537,7 @@ ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill 
 
 ### Work Challenges: Albert
 
-This subset of the data addresses the challenges faced by Data Scientists, and how their time is typically spent at work. 
-
-The Data Scientists were asked to select the challenges (from a predefined list) they encounter at work. They also indicated the frequency (from a predefined list) at which these challenges were faced.
-Responders were also asked to indicate the ratio of time spent performing key Data Science tasks including data gathering, model building, production, visualizing, finding insiights, and `other`.
+In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work.
 
 ## Tidy & Transform
 
@@ -611,32 +608,28 @@ TimeVisualizing -> Visualizing data
 TimeFindingInsights -> Finding insights in the data and communicating these to relevant stakeholders
 TimeOtherSelect -> Other
 
-The plot shows that Data Scientists spend majority of their time cleaning and gathering data, and selecting/building models. 
-These two activities account for over 58% of Data Scientists time on average. Preparing visualizations and finding and communicating insights accounts for 27% of the Data Scientists time, when grouping these relevant activities. This is evidence that **soft skills** play a key role for Data Scientists. 
-
 
 ```{r}
 # Plot: Challenges at Work
-challenges %>%
-  filter(!is.na(`WorkChallengesSelect`)) %>% 
-  group_by( `WorkChallengesSelect` ) %>%
-  summarise( Count = n() ) %>%
-  mutate(Ratio = Count / n()) %>%
-  ggplot(aes(x = reorder(WorkChallengesSelect, Ratio), y = Ratio,  fill=WorkChallengesSelect, label = `Ratio`)) + 
+  filter(challenges, !is.na(`WorkChallengesSelect`)) %>% 
+  group_by(`WorkChallengesSelect` ) %>%
+  summarise( Count = n()/nrow(filter(raw.data,!is.na(`WorkChallengesSelect`)) ) * 100 ) %>%
+  ggplot(aes(x = reorder(WorkChallengesSelect, Count), y = Count,  fill=WorkChallengesSelect, label = round(Count))) + 
   geom_histogram( stat='identity', show.legend = F ) + 
+  geom_text(size = 2, position = position_stack(vjust = 0.5)) +
   coord_flip() +  
-  labs( title = "Challenges at Work", x = "Challenges", y = "Count" )
+  labs( title = "Challenges at Work", x = "Challenges", y = "%" )
 ```
 
-The plot shows that 
 
 
 ```{r}
 # Frequency of Workplace Challenges
-freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>% 
+freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>%
+  mutate(`WorkChallengeFrequency` = str_replace(`WorkChallengeFrequency`, "WorkChallengeFrequency", ""))  %>% 
   group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
   summarise(`Count`= n()) %>% 
-  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2 ) )
+  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2) )
 freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") )
   
   ggplot(freq.data, aes(x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
@@ -646,6 +639,34 @@ freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time
   scale_fill_brewer(palette = 'RdYlBu') + 
   labs( title = "Frequency of Workplace Challenges", x = "Challenge", y = "Frequency" )
 ```
+
+The data shows that data scientists spend a whopping 34% of their time gathering a cleaning data. Almost 25% of their time is spent selecting/building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientits must have superb data cleaning and modeling skills. It also means that data scientists must be able to visually and verbally communicate their findings to stakeholders.
+
+Interestingly, dirty data is the most prevalent challenge. It is faced by 48% of data scientists. 39% of data scientists are challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics and technical writing skills may aid in drafting proposals for financial support. 31% of respondents reported challenges with data access and availability, therefore advanced data acquisition skills may be necessary for data scientists. 
+
+24% of responders reported issues of unused results from data science projects. This is alarmning given that data science can be very expensive. Having certain skills may reduce the proportion of unused results. 
+
+One in four data scientists lack a clear question to answer and direction to take for projects, one in five data scientists reported challenges of explaining data science to others, and one in seven data scientists reported issues with maintaining reasonable expactations for data science projects. These all refer to communication skills and the ingenuity/creativity to frame questions and problems in such a way that will garner proper responses from stakeholders.
+
+It would have been interesting to investigate the relationship between the rate of unused results and the variables related to communication. However the results were internally randomized, therefore results in the same row may not be from the same responder.
+     
+The necessary skills based on time distribution and challenges are:
+
+Hard Skills:
+
+- Data cleaning/management
+- Data Modeling (can be substituted with the results from Rose's section )
+- Data visualization
+- Data Exploration
+
+Soft Skills
+
+- Commincation (verbal & Written)
+- Interpersonal
+- Creativity/Ingenuity
+
+
+
 
 ### Conclusion (writing to csv/importing to sql?)
 
