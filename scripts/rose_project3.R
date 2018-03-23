@@ -34,6 +34,18 @@ alg.select.list <- alg.select$WorkAlgorithmsSelect %>%
 alg.select.dt <- tibble(id = rep(alg.select$id, sapply(alg.select.list, length)), 
                             algorithm = unlist(alg.select.list))
 
+alg.count <- alg.select.dt[, .(count = length(unique(algorithm))), by = .(id)]
+
+library(plotly)
+
+p1 <- ggplotly(ggplot(alg.count, aes(x = factor(0), count)) +
+  geom_boxplot() + 
+  scale_x_discrete(breaks = NULL) +
+  xlab(NULL) +
+  labs(title = "Number of commonly used Algorithm by data scientist") +
+  coord_flip())
+
+
 # separate WorkMethodsSelect as independent table
 method.select <- melt.dt %>%
   select(c('id', 'WorkMethodsSelect'))
@@ -42,7 +54,17 @@ method.select.list <- method.select$WorkMethodsSelect %>%
   strsplit(split = ",")
 method.select.dt <- tibble(id = rep(method.select$id, sapply(method.select.list, length)), 
                                method = unlist(method.select.list))
+method.count <- method.select.dt[, .(count = length(unique(method))), by = .(id)]
 
+p2 <- ggplotly(ggplot(method.count, aes(x = factor(0), count)) +
+  geom_boxplot() + 
+  scale_x_discrete(breaks = NULL) +
+  xlab(NULL) +
+  labs(title = "Number of commonly used Algorithms | Methods by data scientist") +
+  coord_flip())
+
+p <- subplot(p1, p2)
+p
 # Subset the rest
 freq.dt <- melt.dt %>%
   select(c('id', 'WorkDatasetSize', 'WorkMethodsFrequency', 'Frequency'))
@@ -128,3 +150,46 @@ ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), cou
        x = "work methods",
        y = "count")
 
+### SQL example
+library(DBI)
+library(RPostgres)
+
+# Load aws credential
+source("./source_lib/aws_rep_connect.R")
+con <- dbConnect(RPostgres::Postgres(),
+                 host = host,
+                 port = port,
+                 dbname = dbname,
+                 user = user,
+                 password = password)
+
+# check connection
+is.null(con)
+
+# Check DB list, Drop and Create DB
+dbListTables(con)
+#dbExistsTable(con, "table_name")
+#dbRemoveTable(con, "table_name")
+
+## write tables
+dbWriteTable(con, name='frequency', value=freq.dt)
+dbWriteTable(con, name='algorithm', value=alg.select.dt)
+dbWriteTable(con, name='methods', value=method.select.dt)
+
+# Query the table
+rs <- dbSendQuery(con, statement="SELECT * FROM frequency;")
+
+# Fetch all result
+data <- dbFetch(rs, n= -1)
+
+# Remove table
+dbRemoveTable(con, "flight_delay")
+
+# Check table list
+dbListTables(con)
+
+# Clear Result
+dbClearResult(rs)
+
+# Disconnect
+dbDisconnect(con)
