@@ -536,58 +536,52 @@ ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill 
 
 
 ### Work Challenges: Albert
+<h2>What Challenges ata Scientists Experience?</h2>
 
-In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work.
+<div class='well'>
+In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work. We believe that the time spent performing data science related tasks and their respective challenges will provide useful insights on the skills necessary to succeed as a data scientist. 
+</div>
 
-## Tidy & Transform
-
-** Create `challenges` table to store challenges faced by each Data Scientist **
 
 ```{r}
-# Create table to store challenges in long format
 challenges <- raw.data %>% 
   select(id, "WorkChallengesSelect") %>% 
-  cSplit("WorkChallengesSelect", sep = ",", direction = "long") # split cells containing comma delimited values into rows
+  cSplit("WorkChallengesSelect", sep = ",", direction = "long")
 ```
 
-
-** Create `challenges.frequency` table to store the frequency at which these challenges were faced **
-
 ```{r}
-# Create table in long format
+challenges.names <- raw.data %>%
+  select(starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
+  names() %>%
+  str_extract('(?<=WorkChallengeFrequency)(\\w+)') %>% 
+  str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
+  tolower()
+
 challenges.frequency <- raw.data %>%  
   select(id, starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
+  setNames(c('id', challenges.names)) %>%
   gather("WorkChallengeFrequency", "Frequency", -id )
 ```
 
 
-** Create `time.spent` table to store the distribution of time spent **
 
 ```{r}
-# Create table in long format
+time.names <- raw.data %>%
+  select(starts_with("Time"), - TimeSpentStudying) %>%
+  names() %>%
+  str_extract('(?<=Time)(\\w+)') %>% 
+  str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
+  tolower()
+
 time.spent <- raw.data %>%  
   select(id, starts_with("Time"), - TimeSpentStudying) %>%
+  setNames(c('id', time.names)) %>%
   gather("Activity", "Time", -id )
 ```
 
-** Create CSVs for database import **
+
 
 ```{r}
-# Create CSV for `challenges` table
-write.csv(challenges, file = "../tidied_csv/challenges.csv", row.names = FALSE, quote = FALSE)
-
-# Create CSV for `challenges.frequency` table
-write.csv(challenges.frequency, file = "../tidied_csv/challenges.frequency.csv", row.names = FALSE, quote = FALSE)
-
-# Create CSVs for `time.spent` table
-write.csv(time.spent, file = "../tidied_csv/time.spent.csv", row.names = FALSE, quote = FALSE)
-```
-
-## Analysis
-
-**Distribution of time spent**
-```{r}
-# Plot: Distribution of Time Spent
 filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>% 
   mutate(`Time` = as.integer(`Time`)) %>% 
   group_by(`Activity`) %>% 
@@ -599,18 +593,8 @@ filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>%
       labs(title = "Distribution of Time Spent", x = "Activity")
 ```
 
-**Below is a quick reference to the meaning of each activity in the plot.**
 
-TimeGatheringData -> Gathering and cleaning data
-TimeModelBuilding -> Model building/model selection
-TimeProduction -> Putting your work into production
-TimeVisualizing -> Visualizing data
-TimeFindingInsights -> Finding insights in the data and communicating these to relevant stakeholders
-TimeOtherSelect -> Other
-
-
-```{r}
-# Plot: Challenges at Work
+```{r, message=FALSE, warning=FALSE, fig.width=10}
   filter(challenges, !is.na(`WorkChallengesSelect`)) %>% 
   group_by(`WorkChallengesSelect` ) %>%
   summarise( Count = n()/nrow(filter(raw.data,!is.na(`WorkChallengesSelect`)) ) * 100 ) %>%
@@ -618,13 +602,12 @@ TimeOtherSelect -> Other
   geom_histogram( stat='identity', show.legend = F ) + 
   geom_text(size = 2, position = position_stack(vjust = 0.5)) +
   coord_flip() +  
-  labs( title = "Challenges at Work", x = "Challenges", y = "%" )
+  labs( title = "Most Time is Spent Organizing Data", x = "Challenges", y = "%" )
 ```
 
 
 
-```{r}
-# Frequency of Workplace Challenges
+```{r, message=FALSE, warning=FALSE, fig.width=10}
 freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>%
   mutate(`WorkChallengeFrequency` = str_replace(`WorkChallengeFrequency`, "WorkChallengeFrequency", ""))  %>% 
   group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
@@ -637,19 +620,21 @@ freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time
   geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
   coord_flip() +  
   scale_fill_brewer(palette = 'RdYlBu') + 
-  labs( title = "Frequency of Workplace Challenges", x = "Challenge", y = "Frequency" )
+  labs( title = "Majority of the Challenges are Faced Often to  Most of the Time", x = "Challenge", y = "Frequency" )
 ```
 
-The data shows that data scientists spend a whopping 34% of their time gathering a cleaning data. Almost 25% of their time is spent selecting/building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientits must have superb data cleaning and modeling skills. It also means that data scientists must be able to visually and verbally communicate their findings to stakeholders.
+<div class='well'>
+The data shows that data scientists spend a whopping 34% of their time gathering a cleaning data. Almost 25% of their time is spent selecting/building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientists must have superb data cleaning and modeling skills. Data scientists must be able to visually and verbally communicate their findings to stakeholders.
 
-Interestingly, dirty data is the most prevalent challenge. It is faced by 48% of data scientists. 39% of data scientists are challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics and technical writing skills may aid in drafting proposals for financial support. 31% of respondents reported challenges with data access and availability, therefore advanced data acquisition skills may be necessary for data scientists. 
+Interestingly, dirty data is the most prevalent challenge, at 48%. A staggering 39% of data scientists were challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics. Technical writing skills may aid in drafting proposals for financial support. 31% of respondents reported challenges with data access and availability, therefore advanced data acquisition skills is an for data scientists. 
 
-24% of responders reported issues of unused results from data science projects. This is alarmning given that data science can be very expensive. Having certain skills may reduce the proportion of unused results. 
+24% of responders reported issues of unused results from data science projects. This is alarmning, given that data science can be very expensive. Honing communication skills may reduce the proportion of unused results. 
 
-One in four data scientists lack a clear question to answer and direction to take for projects, one in five data scientists reported challenges of explaining data science to others, and one in seven data scientists reported issues with maintaining reasonable expactations for data science projects. These all refer to communication skills and the ingenuity/creativity to frame questions and problems in such a way that will garner proper responses from stakeholders.
+One in four data scientists lack a clear question to answer and a direction to take with the data, one in five data scientists reported challenges of explaining data science to others, and one in seven data scientists reported issues with maintaining reasonable expactations for data science projects. These all speak to communication skills and the ingenuity/creativity to frame questions and problems in such a way that will garner proper responses from stakeholders.
 
-It would have been interesting to investigate the relationship between the rate of unused results and the variables related to communication. However the results were internally randomized, therefore results in the same row may not be from the same responder.
-     
+It would have been interesting to investigate the relationship between the rate of unused results and the variables related to communication. However the results were internally randomized and results in the same row may not be from the same responder.
+</div>
+
 The necessary skills based on time distribution and challenges are:
 
 Hard Skills:
