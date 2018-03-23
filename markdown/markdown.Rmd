@@ -626,6 +626,7 @@ CONCLUSION
 
 ### Work Challenges
 
+<<<<<<< HEAD
 <h2>Challenges Faced by Data Scientists</h2>
 
 <div class='well'>
@@ -633,12 +634,27 @@ In this section, we address the challenges faced by Data Scientists, and how the
 </div>
 
 ```{r, echo=FALSE}
+=======
+### Work Challenges: Albert
+<h2>What Challenges ata Scientists Experience?</h2>
+
+<div class='well'>
+In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work. We believe that the time spent performing data science related tasks and their respective challenges will provide useful insights on the skills necessary to succeed as a data scientist. 
+</div>
+
+
+```{r}
+>>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
 challenges <- raw.data %>% 
   select(id, "WorkChallengesSelect") %>% 
   cSplit("WorkChallengesSelect", sep = ",", direction = "long")
 ```
 
+<<<<<<< HEAD
 ```{r, echo=FALSE}
+=======
+```{r}
+>>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
 challenges.names <- raw.data %>%
   select(starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
   names() %>%
@@ -660,12 +676,25 @@ time.names <- raw.data %>%
   str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
   tolower()
 
+<<<<<<< HEAD
+=======
+
+```{r}
+time.names <- raw.data %>%
+  select(starts_with("Time"), - TimeSpentStudying) %>%
+  names() %>%
+  str_extract('(?<=Time)(\\w+)') %>% 
+  str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
+  tolower()
+
+>>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
 time.spent <- raw.data %>%  
   select(id, starts_with("Time"), - TimeSpentStudying) %>%
   setNames(c('id', time.names)) %>%
   gather("Activity", "Time", -id )
 ```
 
+<<<<<<< HEAD
 ```{r echo=FALSE}
 time.spent %>% 
   filter(!is.na(`Time`), `Time` != 'NA') %>% 
@@ -712,6 +741,98 @@ challenges.frequency %>%
 <div class='well'>
 CONCLUSION
 </div>
+=======
+
+
+```{r}
+filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>% 
+  mutate(`Time` = as.integer(`Time`)) %>% 
+  group_by(`Activity`) %>% 
+  summarise(`Time`= round(mean(`Time`), digits = 2)) %>% 
+    ggplot(aes( x = reorder(Activity, Time), y = Time,fill=Activity, label = `Time`) ) + 
+      geom_bar(stat = "identity", show.legend = F) + 
+      geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
+      coord_flip() +  
+      labs(title = "Distribution of Time Spent", x = "Activity")
+```
+
+
+```{r, message=FALSE, warning=FALSE, fig.width=10}
+  filter(challenges, !is.na(`WorkChallengesSelect`)) %>% 
+  group_by(`WorkChallengesSelect` ) %>%
+  summarise( Count = n()/nrow(filter(raw.data,!is.na(`WorkChallengesSelect`)) ) * 100 ) %>%
+  ggplot(aes(x = reorder(WorkChallengesSelect, Count), y = Count,  fill=WorkChallengesSelect, label = round(Count))) + 
+  geom_histogram( stat='identity', show.legend = F ) + 
+  geom_text(size = 2, position = position_stack(vjust = 0.5)) +
+  coord_flip() +  
+  labs( title = "Most Time is Spent Organizing Data", x = "Challenges", y = "%" )
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, fig.width=10}
+freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>%
+  mutate(`WorkChallengeFrequency` = str_replace(`WorkChallengeFrequency`, "WorkChallengeFrequency", ""))  %>% 
+  group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
+  summarise(`Count`= n()) %>% 
+  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2) )
+freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") )
+  
+  ggplot(freq.data, aes(x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
+  geom_bar( stat = "identity" ) + 
+  geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
+  coord_flip() +  
+  scale_fill_brewer(palette = 'RdYlBu') + 
+  labs( title = "Majority of the Challenges are Faced Often to  Most of the Time", x = "Challenge", y = "Frequency" )
+```
+
+<div class='well'>
+The data shows that data scientists spend a whopping 34% of their time gathering a cleaning data. Almost 25% of their time is spent selecting/building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientists must have superb data cleaning and modeling skills. Data scientists must be able to visually and verbally communicate their findings to stakeholders.
+
+Interestingly, dirty data is the most prevalent challenge, at 48%. A staggering 39% of data scientists were challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics. Technical writing skills may aid in drafting proposals for financial support. 31% of respondents reported challenges with data access and availability, therefore advanced data acquisition skills is an for data scientists. 
+
+24% of responders reported issues of unused results from data science projects. This is alarmning, given that data science can be very expensive. Honing communication skills may reduce the proportion of unused results. 
+
+One in four data scientists lack a clear question to answer and a direction to take with the data, one in five data scientists reported challenges of explaining data science to others, and one in seven data scientists reported issues with maintaining reasonable expactations for data science projects. These all speak to communication skills and the ingenuity/creativity to frame questions and problems in such a way that will garner proper responses from stakeholders.
+
+It would have been interesting to investigate the relationship between the rate of unused results and the variables related to communication. However the results were internally randomized and results in the same row may not be from the same responder.
+</div>
+
+The necessary skills based on time distribution and challenges are:
+
+Hard Skills:
+
+- Data cleaning/management
+- Data Modeling (can be substituted with the results from Rose's section )
+- Data visualization
+- Data Exploration
+
+Soft Skills
+
+- Commincation (verbal & Written)
+- Interpersonal
+- Creativity/Ingenuity
+
+
+
+
+### Conclusion (writing to csv/importing to sql?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
 
 ### Conclusion
 
