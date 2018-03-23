@@ -137,6 +137,8 @@ ggplot(education, aes(x=education.names, y=percent, fill=education.names)) +
 <img src="https://raw.githubusercontent.com/brian-cuny/607project3/master/scripts/burthworks_study_education_levels.PNG">
 </div>
 
+<div class='clearfix'></div>
+
 <div class='col-left'>
 ```{r,echo=FALSE}
 our_gender_data <- chooseOne('GenderSelect')
@@ -351,7 +353,11 @@ It is interested to note that nearly 75% of data scientists indicate they learne
 
 <h2>Common Alogrithms and Methods Used by Data Scientists</h2>
 
-```{r echo=FALSE}
+<div class='well'>
+In this section, we explore commonly used algorithms and methods that are presumably required as basic skills in data science field.
+</div>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 data.rose <- raw.data %>%
   select(c(1, 80:81, 134:167))
 
@@ -456,15 +462,10 @@ g.size <- ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, c
        y = "count")
 ```
 
-<div class='well'>
-INTRODUCTION
-
-In this section, we explore commonly used algorithms and methods that are presumably required as basic skills in data science field.
-</div>
-
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 14}
 g.alg
 ```
+
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 14}
 g.method
 ```
@@ -486,13 +487,7 @@ p2 <- ggplotly(ggplot(method.count, aes(x = factor(0), count)) +
   coord_flip())
 
 p <- subplot(p1, p2)
-p
-# summary(alg.count)
-# summary(method.count)
-
 ```
-
-
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10}
 g.size.freq
@@ -503,8 +498,6 @@ g.size
 ```
 
 <div class='well'>
-CONCLUSION
-
 It appears that on average, data scientists use at least 3 algorithms and 7 methods in their work.
 As the bar graph shows above, the most commonly used algorithms and methods as follows:
 
@@ -526,13 +519,15 @@ An average data scientist is able to the above listed algorithms and methods as 
 An exceptional data scientist may be capable of handling 7 to 30 methods and 4 to 15 algorithms.
 
 Furthermore, the most commonly used size of dataset appears to fall in the 1GB ~ 10GB range ( > 50%). For reference, the last graph displays the most used methods by size of dataset. 
-
 </div>
 
 ### Work Tools Freqeuncy
 
 <h2>Frequency of Use for Various Tools by Data Scientists</h2>
 
+<div class='well'>
+INTRODUCTION
+</div>
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 tidy.names <- names(raw.data)[83:132]%>% 
@@ -626,35 +621,19 @@ CONCLUSION
 
 ### Work Challenges
 
-<<<<<<< HEAD
-<h2>Challenges Faced by Data Scientists</h2>
-
-<div class='well'>
-In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work. 
-</div>
-
-```{r, echo=FALSE}
-=======
-### Work Challenges: Albert
 <h2>What Challenges ata Scientists Experience?</h2>
 
 <div class='well'>
 In this section, we address the challenges faced by Data Scientists, and how their time is typically spent at work. We believe that the time spent performing data science related tasks and their respective challenges will provide useful insights on the skills necessary to succeed as a data scientist. 
 </div>
 
-
-```{r}
->>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
+```{r, echo=FALSE}
 challenges <- raw.data %>% 
   select(id, "WorkChallengesSelect") %>% 
   cSplit("WorkChallengesSelect", sep = ",", direction = "long")
 ```
 
-<<<<<<< HEAD
 ```{r, echo=FALSE}
-=======
-```{r}
->>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
 challenges.names <- raw.data %>%
   select(starts_with("WorkChallenge"), -WorkChallengesSelect) %>%
   names() %>%
@@ -676,25 +655,12 @@ time.names <- raw.data %>%
   str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
   tolower()
 
-<<<<<<< HEAD
-=======
-
-```{r}
-time.names <- raw.data %>%
-  select(starts_with("Time"), - TimeSpentStudying) %>%
-  names() %>%
-  str_extract('(?<=Time)(\\w+)') %>% 
-  str_replace_all('(?<=[a-z])([A-Z])', '_\\1') %>%
-  tolower()
-
->>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
 time.spent <- raw.data %>%  
   select(id, starts_with("Time"), - TimeSpentStudying) %>%
   setNames(c('id', time.names)) %>%
   gather("Activity", "Time", -id )
 ```
 
-<<<<<<< HEAD
 ```{r echo=FALSE}
 time.spent %>% 
   filter(!is.na(`Time`), `Time` != 'NA') %>% 
@@ -739,54 +705,6 @@ challenges.frequency %>%
 ```
 
 <div class='well'>
-CONCLUSION
-</div>
-=======
-
-
-```{r}
-filter( time.spent, !is.na(`Time`), `Time` != 'NA') %>% 
-  mutate(`Time` = as.integer(`Time`)) %>% 
-  group_by(`Activity`) %>% 
-  summarise(`Time`= round(mean(`Time`), digits = 2)) %>% 
-    ggplot(aes( x = reorder(Activity, Time), y = Time,fill=Activity, label = `Time`) ) + 
-      geom_bar(stat = "identity", show.legend = F) + 
-      geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
-      coord_flip() +  
-      labs(title = "Distribution of Time Spent", x = "Activity")
-```
-
-
-```{r, message=FALSE, warning=FALSE, fig.width=10}
-  filter(challenges, !is.na(`WorkChallengesSelect`)) %>% 
-  group_by(`WorkChallengesSelect` ) %>%
-  summarise( Count = n()/nrow(filter(raw.data,!is.na(`WorkChallengesSelect`)) ) * 100 ) %>%
-  ggplot(aes(x = reorder(WorkChallengesSelect, Count), y = Count,  fill=WorkChallengesSelect, label = round(Count))) + 
-  geom_histogram( stat='identity', show.legend = F ) + 
-  geom_text(size = 2, position = position_stack(vjust = 0.5)) +
-  coord_flip() +  
-  labs( title = "Most Time is Spent Organizing Data", x = "Challenges", y = "%" )
-```
-
-
-
-```{r, message=FALSE, warning=FALSE, fig.width=10}
-freq.data <- filter( challenges.frequency, !is.na(`Frequency`) ) %>%
-  mutate(`WorkChallengeFrequency` = str_replace(`WorkChallengeFrequency`, "WorkChallengeFrequency", ""))  %>% 
-  group_by(`WorkChallengeFrequency`, `Frequency`) %>% 
-  summarise(`Count`= n()) %>% 
-  mutate(`Ratio` = round(  ( `Count` / sum( `Count` ) ) * 100, digits = 2) )
-freq.data$Frequency <- factor( freq.data$Frequency, levels = c("Most of the time", "Often" , "Sometimes", "Rarely") )
-  
-  ggplot(freq.data, aes(x = WorkChallengeFrequency, y = Ratio, fill = Frequency,label = Ratio ) ) + 
-  geom_bar( stat = "identity" ) + 
-  geom_text(size = 2, position = position_stack(vjust = 0.5)) + 
-  coord_flip() +  
-  scale_fill_brewer(palette = 'RdYlBu') + 
-  labs( title = "Majority of the Challenges are Faced Often to  Most of the Time", x = "Challenge", y = "Frequency" )
-```
-
-<div class='well'>
 The data shows that data scientists spend a whopping 34% of their time gathering a cleaning data. Almost 25% of their time is spent selecting/building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientists must have superb data cleaning and modeling skills. Data scientists must be able to visually and verbally communicate their findings to stakeholders.
 
 Interestingly, dirty data is the most prevalent challenge, at 48%. A staggering 39% of data scientists were challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics. Technical writing skills may aid in drafting proposals for financial support. 31% of respondents reported challenges with data access and availability, therefore advanced data acquisition skills is an for data scientists. 
@@ -798,42 +716,6 @@ One in four data scientists lack a clear question to answer and a direction to t
 It would have been interesting to investigate the relationship between the rate of unused results and the variables related to communication. However the results were internally randomized and results in the same row may not be from the same responder.
 </div>
 
-The necessary skills based on time distribution and challenges are:
-
-Hard Skills:
-
-- Data cleaning/management
-- Data Modeling (can be substituted with the results from Rose's section )
-- Data visualization
-- Data Exploration
-
-Soft Skills
-
-- Commincation (verbal & Written)
-- Interpersonal
-- Creativity/Ingenuity
-
-
-
-
-### Conclusion (writing to csv/importing to sql?)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> 432546488b064d52894f16ca2b300c26c51fed83
-
 ### Conclusion
 
 <h2>Skill List</h2>
@@ -842,13 +724,18 @@ Soft Skills
 
 HARD SKILLS
 
-1. List
-2. 
+1. can clean, explore, model and visualize data.
+2. can use the most common algorithms (Regression/Logistic Regression, Decision Trees, Random Forests)
+3. can use the most common problem solving methods (Data Visualization, Logistic Regression, Cross-validation)
+4. 
   
 SOFT SKILLS
 
 1. learn from diverse sources.
 2. continue to learn even after they have secured a job.
+3. have strong verbal and written communication and interpersonal skills.
+4. possess ingenuity and creativity.
+5. 
 
 <div class='well'>
 In conclusion...
