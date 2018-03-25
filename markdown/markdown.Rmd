@@ -313,8 +313,6 @@ ggplot(us_money, aes(x=groups, y=percent, fill=groups)) +
 ```
 
 <div class='well'>
-CONCLUSION
-
 + Dataset Validation
     + Comparing the Burtchworks study with our Kaggle dataset, our dataset matches well with gender demographics and has comparable Educational Achievement levels(Burtchworks study shows these levels fluctuate yearly)
     + Given the differences in tenure rates, the Kaggle dataset may be reflective of a younger demographic within the Data Science community
@@ -462,7 +460,7 @@ It is interesting to note that nearly 75% of data scientists indicate they learn
 
 <h2>Common Alogrithms and Methods Used by Data Scientists</h2>
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 data.rose <- raw.data %>%
   select(c(1, 80:81, 134:167))
 
@@ -476,7 +474,7 @@ melt.dt <- data.rose %>%
   gather('WorkMethodsFrequency', 'Frequency', 5:37)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 alg.select <- melt.dt %>%
   select(c('id', 'WorkAlgorithmsSelect'))
 alg.select.list <- alg.select$WorkAlgorithmsSelect %>%
@@ -486,7 +484,7 @@ alg.select.dt <- tibble(id = rep(alg.select$id, sapply(alg.select.list, length))
 alg.select.dt <- unique(alg.select.dt)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 method.select <- melt.dt %>%
   select(c('id', 'WorkMethodsSelect'))
 method.select.list <- method.select$WorkMethodsSelect %>%
@@ -497,12 +495,12 @@ method.select.dt <- tibble(id = rep(method.select$id, sapply(method.select.list,
 method.select.dt <- unique(method.select.dt)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 freq.dt <- melt.dt %>%
   select(c('id', 'WorkDatasetSize', 'WorkMethodsFrequency', 'Frequency'))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 alg.select.dt <- as.data.table(alg.select.dt)
 alg.total <- nrow(na.omit(alg.select.dt))
 alg.vis <- na.omit(alg.select.dt)[, .(count = length(id)), by = .(algorithm)][order(-count)]
@@ -518,7 +516,7 @@ g.alg <- ggplot(alg.vis, aes(reorder(algorithm, count), count, fill = algorithm)
        y = "count") 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 method.select.dt <- as.data.table(method.select.dt)
 method.total <- nrow(na.omit(method.select.dt))
 method.vis <- na.omit(method.select.dt)[, .(count = length(id)), by = .(method)][order(-count)]
@@ -534,7 +532,7 @@ g.method <- ggplot(method.vis, aes(reorder(method, count), count, fill = method)
        y = "count") 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 freq.dt <- as.data.table(freq.dt)
 freq.dt <- freq.dt[, .(count = .N), by = .(Frequency, WorkMethodsFrequency,WorkDatasetSize)]
 freq.total <- nrow(freq.dt)
@@ -555,7 +553,7 @@ g.size.freq <- ggplotly(ggplot(size.freq, aes(x = Frequency, y = count,
   
 ```
 
-```{r, fig.height=8, echo=FALSE}
+```{r, fig.height=8, echo=FALSE, warning=FALSE, message=FALSE}
 g.size <- ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), count, fill = WorkMethodsFrequency)) +
   guides(fill=FALSE) +
   geom_bar(stat = 'identity') +
@@ -568,8 +566,6 @@ g.size <- ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, c
 ```
 
 <div class='well'>
-INTRODUCTION
-
 In this section, we explore commonly used algorithms and methods that are presumably required as basic skills in data science field.
 </div>
 
@@ -603,8 +599,6 @@ p
 
 ```
 
-
-
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10}
 g.size.freq
 ```
@@ -614,8 +608,6 @@ g.size
 ```
 
 <div class='well'>
-CONCLUSION
-
 It appears that on average, data scientists use at least 3 algorithms and 7 methods in their work.
 As the bar graph shows above, the most commonly used algorithms and methods as follows:
 
@@ -637,8 +629,8 @@ An average data scientist is able to the above listed algorithms and methods as 
 An exceptional data scientist may be capable of handling 7 to 30 methods and 4 to 15 algorithms.
 
 Furthermore, the most commonly used size of dataset appears to fall in the 1GB ~ 10GB range ( > 50%). For reference, the last graph displays the most used methods by size of dataset. 
-
 </div>
+
 ### Work Tools Freqeuncy
 
 <h2>Frequency of Use for Various Tools by Data Scientists</h2>
