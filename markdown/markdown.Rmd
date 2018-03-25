@@ -20,7 +20,7 @@ library(ggplot2)
 library(plotly)
 library(splitstackshape)
 library(devtools)
-install_github("easyGgplot2", "kassambara")
+#devtools::install_github("kassambara/easyGgplot2", force = T)
 library(easyGgplot2)
 ```
 
@@ -462,11 +462,7 @@ It is interesting to note that nearly 75% of data scientists indicate they learn
 
 <h2>Common Alogrithms and Methods Used by Data Scientists</h2>
 
-<div class='well'>
-In this section, we explore commonly used algorithms and methods that are presumably required as basic skills in data science field.
-</div>
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE}
 data.rose <- raw.data %>%
   select(c(1, 80:81, 134:167))
 
@@ -480,7 +476,7 @@ melt.dt <- data.rose %>%
   gather('WorkMethodsFrequency', 'Frequency', 5:37)
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE}
 alg.select <- melt.dt %>%
   select(c('id', 'WorkAlgorithmsSelect'))
 alg.select.list <- alg.select$WorkAlgorithmsSelect %>%
@@ -490,7 +486,7 @@ alg.select.dt <- tibble(id = rep(alg.select$id, sapply(alg.select.list, length))
 alg.select.dt <- unique(alg.select.dt)
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE}
 method.select <- melt.dt %>%
   select(c('id', 'WorkMethodsSelect'))
 method.select.list <- method.select$WorkMethodsSelect %>%
@@ -506,7 +502,7 @@ freq.dt <- melt.dt %>%
   select(c('id', 'WorkDatasetSize', 'WorkMethodsFrequency', 'Frequency'))
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE}
 alg.select.dt <- as.data.table(alg.select.dt)
 alg.total <- nrow(na.omit(alg.select.dt))
 alg.vis <- na.omit(alg.select.dt)[, .(count = length(id)), by = .(algorithm)][order(-count)]
@@ -522,7 +518,7 @@ g.alg <- ggplot(alg.vis, aes(reorder(algorithm, count), count, fill = algorithm)
        y = "count") 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE}
 method.select.dt <- as.data.table(method.select.dt)
 method.total <- nrow(na.omit(method.select.dt))
 method.vis <- na.omit(method.select.dt)[, .(count = length(id)), by = .(method)][order(-count)]
@@ -538,7 +534,7 @@ g.method <- ggplot(method.vis, aes(reorder(method, count), count, fill = method)
        y = "count") 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r echo=FALSE}
 freq.dt <- as.data.table(freq.dt)
 freq.dt <- freq.dt[, .(count = .N), by = .(Frequency, WorkMethodsFrequency,WorkDatasetSize)]
 freq.total <- nrow(freq.dt)
@@ -559,7 +555,7 @@ g.size.freq <- ggplotly(ggplot(size.freq, aes(x = Frequency, y = count,
   
 ```
 
-```{r, fig.height=8, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r, fig.height=8, echo=FALSE}
 g.size <- ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), count, fill = WorkMethodsFrequency)) +
   guides(fill=FALSE) +
   geom_bar(stat = 'identity') +
@@ -571,15 +567,20 @@ g.size <- ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, c
        y = "count")
 ```
 
+<div class='well'>
+INTRODUCTION
+
+In this section, we explore commonly used algorithms and methods that are presumably required as basic skills in data science field.
+</div>
+
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 14}
 g.alg
 ```
-
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 14}
 g.method
 ```
 
-```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.heigth = 2, include=FALSE}
+```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.heigth = 2}
 alg.count <- alg.select.dt[, .(count = length(unique(algorithm))), by = .(id)]
 p1 <- ggplotly(ggplot(alg.count, aes(x = factor(0), count)) +
   geom_boxplot() + 
@@ -596,7 +597,13 @@ p2 <- ggplotly(ggplot(method.count, aes(x = factor(0), count)) +
   coord_flip())
 
 p <- subplot(p1, p2)
+p
+# summary(alg.count)
+# summary(method.count)
+
 ```
+
+
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10}
 g.size.freq
@@ -607,6 +614,8 @@ g.size
 ```
 
 <div class='well'>
+CONCLUSION
+
 It appears that on average, data scientists use at least 3 algorithms and 7 methods in their work.
 As the bar graph shows above, the most commonly used algorithms and methods as follows:
 
@@ -624,12 +633,12 @@ As the bar graph shows above, the most commonly used algorithms and methods as f
     + Neural Networks (5.28%)
     + Time Series Analysis (5.03%)
 
-An average data scientist is able to use the above listed algorithms and methods as basic hard skills to meet the standard industry expectations.
+An average data scientist is able to the above listed algorithms and methods as basic hard skills to meet the standard industry expectation.
 An exceptional data scientist may be capable of handling 7 to 30 methods and 4 to 15 algorithms.
 
 Furthermore, the most commonly used size of dataset appears to fall in the 1GB ~ 10GB range ( > 50%). For reference, the last graph displays the most used methods by size of dataset. 
-</div>
 
+</div>
 ### Work Tools Freqeuncy
 
 <h2>Frequency of Use for Various Tools by Data Scientists</h2>
