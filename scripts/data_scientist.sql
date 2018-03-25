@@ -2,6 +2,10 @@ DROP TABLE IF EXISTS teaching;
 DROP TABLE IF EXISTS algorithm;
 DROP TABLE IF EXISTS method;
 DROP TABLE IF EXISTS tool;
+DROP TABLE IF EXISTS platform;
+DROP TABLE IF EXISTS time;
+DROP TABLE IF EXISTS challenge;
+DROP TABLE IF EXISTS challenge_frequency;
 DROP TABLE IF EXISTS datascience;
 
 CREATE TABLE datascience (
@@ -137,4 +141,20 @@ LINES TERMINATED BY '\n'
 IGNORE 1 ROWS(id,challenge, @frequency)
 SET 
 time = nullif(@frequency,'NA')
+
+CREATE TABLE platform(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    ds_id INTEGER NOT NULL,
+    platform_name VARCHAR(255) NOT NULL,
+    usefulness VARCHAR(100) NOT NULL,
+    foreign key(ds_id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE 'C:\\Users\\Brian\\Desktop\\GradClasses\\Spring18\\607\\607project3\\tidied_csv\\platform_usefulness.csv'
+INTO TABLE platform
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(ds_id, platform_name, usefulness)
+
 ;

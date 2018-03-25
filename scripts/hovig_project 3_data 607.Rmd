@@ -1,0 +1,95 @@
+---
+title: "Project 3 - Data 607"
+author: "Ohannes (Hovig) Ohannessian"
+date: "3/20/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(plyr)
+library(tidyverse)
+library(splitstackshape)
+library(magrittr)
+library(knitr)
+library(stringr)
+library(ggplot2)
+library(devtools)
+install_github("easyGgplot2", "kassambara")
+library(easyGgplot2)
+```
+
+## Introduction
+
+The learning platform usefulness shows a survey of what sources data scientists used to gain knowledge.
+
+```{r, warning=FALSE, message=FALSE}
+raw.data <- read_csv('https://raw.githubusercontent.com/brian-cuny/607project3/master/multipleChoiceResponses.csv', na=c('', 'NA')) %>%
+  subset(DataScienceIdentitySelect == 'Yes' & CodeWriter == 'Yes') %>%
+  rowid_to_column('id')
+```
+
+
+```{r}
+usefulness_col_names<-names(raw.data[17:35]) %>%
+          str_extract('(?<=LearningPlatformUsefulness)(\\w+)') 
+usefulness_col_names[1]<-c("Select")
+usefulness_col_names
+anoun<-usefulness_col_names
+```
+
+
+```{r}
+
+tidy.data <- raw.data %>%
+  select(c(1, 17:35)) %>%
+  setNames(c('id', usefulness_col_names)) %>%
+  write_csv('platform_usefulness.csv')
+remove.commas<-unlist(gsub(" ", "", na.omit(tidy.data[4])))
+total_notuseful<-c()
+total_veryuseful<-c()
+total_somewhatuseful<-c()
+for(i in 3:length(tidy.data)){
+  remove.commas<-unlist(gsub(" ", "", na.omit(tidy.data[i])))
+  m<-unlist(strsplit(remove.commas, "\\W+"))
+  n<-table(m)
+  total_notuseful[i-2]<-as.vector(n[2:4])[1]
+  total_veryuseful[i-2]<-as.vector(n[2:4])[2]
+  total_somewhatuseful[i-2]<-as.vector(n[2:4])[3]
+}
+
+total_usefulness<-data.frame(
+  usefulness_name=c("notuseful","veryuseful","somewhatuseful"),
+  usefulness_count=c(total_notuseful,total_veryuseful,total_somewhatuseful)
+  )
+
+per_usefulness<-data.frame(name=c(anoun[2:19]),count=c(total_notuseful))
+
+ggplot2.density(data=total_usefulness, xName='usefulness_count', groupName='usefulness_name',
+    legendPosition="top",
+    alpha=0.5, fillGroupDensity=TRUE )
+
+par(mfrow = c(3, 1))
+p1<-ggplot(per_usefulness, aes(name, count))
+p1 +geom_bar(stat = "identity", width = 0.7, colour="red", fill="#FFDEAD") + xlab("Usefulness in") + ylab("Not Useful") + geom_text(aes(label=count), hjust = 1)+theme(axis.text.x = element_text(angle=60, hjust=1))
+
+per_usefulness<-data.frame(name=c(anoun[2:19]),count=c(total_veryuseful))
+p2<-ggplot(per_usefulness, aes(name, count))
+p2 +geom_bar(stat = "identity", width = 0.7, colour="blue", fill="#BDB76B") + xlab("Usefulness in") + ylab("Very Useful") + geom_text(aes(label=count), hjust = 1)+theme(axis.text.x = element_text(angle=60, hjust=1))
+
+
+per_usefulness<-data.frame(name=c(anoun[2:19]),count=c(total_somewhatuseful))
+p3<-ggplot(per_usefulness, aes(name, count))
+p3 +geom_bar(stat = "identity", width = 0.7, colour="orange", fill="#ADD8E6") + xlab("Usefulness in") + ylab("Somewhat Useful") + geom_text(aes(label=count), hjust = 1)+theme(axis.text.x = element_text(angle=60, hjust=1))
+```
+
+## Conclusion
+
+```{r}
+col_names<-anoun[2:19]
+notuseful_column<-col_names[which(total_notuseful==max(total_notuseful))]
+veryuseful_column<-col_names[which(total_veryuseful==max(total_veryuseful))]
+somewhatuseful_column<-col_names[which(total_somewhatuseful==max(total_somewhatuseful))]
+kable(data.frame(usefulness_column=c(most_not_useful=c(notuseful_column),most_very_useful=c(veryuseful_column),most_somewhat_useful=c(somewhatuseful_column))))
+```
+
+The table shows on the ranking of each learning platform's importance found in the dataset.
