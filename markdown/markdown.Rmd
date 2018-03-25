@@ -18,6 +18,10 @@ library(kableExtra)
 library(data.table)
 library(ggplot2)
 library(plotly)
+library(splitstackshape)
+library(devtools)
+install_github("easyGgplot2", "kassambara")
+library(easyGgplot2)
 ```
 
 <div class='jumbotron'>
@@ -101,7 +105,7 @@ create_breaks <- function(dfcolumn,breaks,labels){
 <h2>Data Scientist Demographics</h2>
 
 <div class='well'>
-INTRODUCTION HERE
+This section pertains to the demographics within the Data Science community.  While the Kaggle dataset seems to be a solid fit for our project goals, demographics describing the Data Science field are availble from multiple sources.  By exploring the demographics of our Kaggle dataset, alongside another demographics report, we can get better validate the Kaggle dataset as well as expose sampling biases that may exist in the Kaggle dataset.  The Burtchworks study on the Data Science field is the data we used for comparisons.  This study can be downloaded [here](https://www.burtchworks.com/big-data-analyst-salary/big-data-career-tips/the-burtch-works-study/)  
 </div>
 
 ```{r pressure, warning=FALSE, message=FALSE, echo=FALSE}
@@ -247,6 +251,47 @@ ggplot(., aes(x = EmployerIndustry,y=percent, fill = EmployerIndustry)) +
            )
 ```
 
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+explore_data_sciences <- function(academic_indus){
+Academic_SizeChange <- Academic_exploration("EmployerSizeChange",Academic_indus)
+}
+
+col_plots_names <-c('Academic',"Technology","Financial","Government")
+fields<-c() 
+
+Academic_indus <- exp_df %>%
+    filter(EmployerIndustry%in%c("Academic"))
+a <- explore_data_sciences(Academic_indus)
+Academic_indus <- exp_df %>%
+    filter(EmployerIndustry%in%c("Technology"))
+b <- explore_data_sciences(Academic_indus)
+Academic_indus <- exp_df %>%
+    filter(EmployerIndustry%in%c("Financial"))
+c <- explore_data_sciences(Academic_indus)
+Academic_indus <- exp_df %>%
+    filter(EmployerIndustry%in%c("Government"))
+d <- explore_data_sciences(Academic_indus)
+
+
+for (x in col_plots_names){
+    my_names <- c(rep(x,5))
+    fields <- append(fields, my_names)
+}
+
+new_combined.data <- rbind(a,b,c,d)
+new_combined.data <- cbind(new_combined.data,fields)
+
+ggplot(new_combined.data, aes(x=EmployerSizeChange, y=percent %>% as.numeric() %>% plyr::round_any(1), fill=fields)) +
+  geom_bar(stat='identity', position='dodge') + 
+    scale_fill_brewer(palette='Paired') + 
+    labs(title='Job Growth In Top Fields',
+         x='EmployerSizeChange',
+         y='Percent',
+         fill='Fields')+
+    scale_x_discrete("EmployerSizeChange", limits=c('Decreased significantly','Decreased slightly',"Stayed the same","Increased slightly","Increased significantly"))+
+     theme(axis.text.x=element_text(angle=45,hjust=1)) 
+```
+
 ```{r, echo=FALSE}
 US_only_df <- exp_df %>% 
     filter(Country%in%c('United States'))
@@ -269,6 +314,18 @@ ggplot(us_money, aes(x=groups, y=percent, fill=groups)) +
 
 <div class='well'>
 CONCLUSION
+
++ Dataset Validation
+    + Comparing the Burtchworks study with our Kaggle dataset, our dataset matches well with gender demographics and has comparable Educational Achievement levels(Burtchworks study shows these levels fluctuate yearly)
+    + Given the differences in tenure rates, the Kaggle dataset may be reflective of a younger demographic within the Data Science community
+
++ General demographic observations
+    + Data Scientists tend to have STEM backgrounds, less than ten percent of Data Scientists come from Social Science or Humanities background
+    +  Finance, Tech, and Academics are the 3 largest employers in the Data Science field 
+    + Moderate to significant job growth is occurring across the top fields
+    + Mean and median US salaries are around 121k and 100k respectively
+        + Our sample size here is only 393 respondents 
+        + Outliers were not addressed
 </div>
 
 ### Learning Platform Usefulness
@@ -276,12 +333,64 @@ CONCLUSION
 <h2>Usefulness of Various Learning Platforms</h2>
 
 <div class='well'>
-INTRODUCTION
+This section examines the usefulness of various learning platforms.
 </div>
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+usefulness_col_names<-names(raw.data[17:35]) %>%
+          str_extract('(?<=LearningPlatformUsefulness)(\\w+)') 
+usefulness_col_names[1]<-c("Select")
+usefulness_col_names
+anoun<-usefulness_col_names
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+tidy.data <- raw.data %>%
+  select(c(1, 17:35)) %>%
+  setNames(c('id', usefulness_col_names))
+remove.commas<-unlist(gsub(" ", "", na.omit(tidy.data[4])))
+total_notuseful<-c()
+total_veryuseful<-c()
+total_somewhatuseful<-c()
+for(i in 3:length(tidy.data)){
+  remove.commas<-unlist(gsub(" ", "", na.omit(tidy.data[i])))
+  m<-unlist(strsplit(remove.commas, "\\W+"))
+  n<-table(m)
+  total_notuseful[i-2]<-as.vector(n[2:4])[1]
+  total_veryuseful[i-2]<-as.vector(n[2:4])[2]
+  total_somewhatuseful[i-2]<-as.vector(n[2:4])[3]
+}
+
+total_usefulness<-data.frame(
+  usefulness_name=c("notuseful","veryuseful","somewhatuseful"),
+  usefulness_count=c(total_notuseful,total_veryuseful,total_somewhatuseful)
+  )
+
+per_usefulness<-data.frame(name=c(anoun[2:19]),count=c(total_notuseful))
+
+ggplot2.density(data=total_usefulness, xName='usefulness_count', groupName='usefulness_name',
+    legendPosition="top",
+    alpha=0.5, fillGroupDensity=TRUE )
+```
+
+```{r echo=FALSE}
+par(mfrow = c(3, 1))
+p1<-ggplot(per_usefulness, aes(name, count))
+p1 +geom_bar(stat = "identity", width = 0.7, colour="red", fill="#FFDEAD") + xlab("Platform") + ylab("Not Useful") + geom_text(aes(label=count), hjust = 1)+theme(axis.text.x = element_text(angle=60, hjust=1))
+
+per_usefulness<-data.frame(name=c(anoun[2:19]),count=c(total_somewhatuseful))
+p3<-ggplot(per_usefulness, aes(name, count))
+p3 +geom_bar(stat = "identity", width = 0.7, colour="orange", fill="#ADD8E6") + xlab("Platform") + ylab("Somewhat Useful") + geom_text(aes(label=count), hjust = 1)+theme(axis.text.x = element_text(angle=60, hjust=1))
+
+per_usefulness<-data.frame(name=c(anoun[2:19]),count=c(total_veryuseful))
+p2<-ggplot(per_usefulness, aes(name, count))
+p2 +geom_bar(stat = "identity", width = 0.7, colour="blue", fill="#BDB76B") + xlab("Platform") + ylab("Very Useful") + geom_text(aes(label=count), hjust = 1)+theme(axis.text.x = element_text(angle=60, hjust=1))
+```
 
 <div class='well'>
-CONCLUSION
+Data scientists largly agree on the platforms that are helpful and unhelpful in their professions. Other than Kaggle (which appears unrepresentatively high due to the nature of the data set), Data Scientists find Youtube, blogs and texbooks to be great learning resources. There is also broad agreement that conferences and coursework are beneficial.
+
+Broadly speaking, Data Scientists find benefit in meeting with and learning from more experienced members.
 </div>
 
 ### Learning Categories
@@ -346,7 +455,7 @@ ggplot(tidy.data) +
 <div class='well'>
 Our data shows a great diversity in learning styles. This indicates that not only do data scientists learn from a variety of sources, but every data scientist's sources vary in importance. This highlights the idea that there is no right or wrong way to learn to become a data scientist. At the same time, as the four major categories amount for nearly 100% of education, this means that there are no "secret" learning sources.
 
-It is interested to note that nearly 75% of data scientists indicate they learned while on the job. 
+It is interesting to note that nearly 75% of data scientists indicate they learned while on the job. 
 </div>
 
 ### Common Job Algorithms
@@ -357,7 +466,7 @@ It is interested to note that nearly 75% of data scientists indicate they learne
 In this section, we explore commonly used algorithms and methods that are presumably required as basic skills in data science field.
 </div>
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 data.rose <- raw.data %>%
   select(c(1, 80:81, 134:167))
 
@@ -371,7 +480,7 @@ melt.dt <- data.rose %>%
   gather('WorkMethodsFrequency', 'Frequency', 5:37)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 alg.select <- melt.dt %>%
   select(c('id', 'WorkAlgorithmsSelect'))
 alg.select.list <- alg.select$WorkAlgorithmsSelect %>%
@@ -381,7 +490,7 @@ alg.select.dt <- tibble(id = rep(alg.select$id, sapply(alg.select.list, length))
 alg.select.dt <- unique(alg.select.dt)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 method.select <- melt.dt %>%
   select(c('id', 'WorkMethodsSelect'))
 method.select.list <- method.select$WorkMethodsSelect %>%
@@ -397,7 +506,7 @@ freq.dt <- melt.dt %>%
   select(c('id', 'WorkDatasetSize', 'WorkMethodsFrequency', 'Frequency'))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 alg.select.dt <- as.data.table(alg.select.dt)
 alg.total <- nrow(na.omit(alg.select.dt))
 alg.vis <- na.omit(alg.select.dt)[, .(count = length(id)), by = .(algorithm)][order(-count)]
@@ -413,7 +522,7 @@ g.alg <- ggplot(alg.vis, aes(reorder(algorithm, count), count, fill = algorithm)
        y = "count") 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 method.select.dt <- as.data.table(method.select.dt)
 method.total <- nrow(na.omit(method.select.dt))
 method.vis <- na.omit(method.select.dt)[, .(count = length(id)), by = .(method)][order(-count)]
@@ -429,7 +538,7 @@ g.method <- ggplot(method.vis, aes(reorder(method, count), count, fill = method)
        y = "count") 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 freq.dt <- as.data.table(freq.dt)
 freq.dt <- freq.dt[, .(count = .N), by = .(Frequency, WorkMethodsFrequency,WorkDatasetSize)]
 freq.total <- nrow(freq.dt)
@@ -450,7 +559,7 @@ g.size.freq <- ggplotly(ggplot(size.freq, aes(x = Frequency, y = count,
   
 ```
 
-```{r, fig.height=8, echo=FALSE}
+```{r, fig.height=8, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 g.size <- ggplot(na.omit(freq.dt[count>25]), aes(reorder(WorkMethodsFrequency, count), count, fill = WorkMethodsFrequency)) +
   guides(fill=FALSE) +
   geom_bar(stat = 'identity') +
@@ -470,7 +579,7 @@ g.alg
 g.method
 ```
 
-```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.heigth = 2}
+```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.heigth = 2, include=FALSE}
 alg.count <- alg.select.dt[, .(count = length(unique(algorithm))), by = .(id)]
 p1 <- ggplotly(ggplot(alg.count, aes(x = factor(0), count)) +
   geom_boxplot() + 
@@ -515,7 +624,7 @@ As the bar graph shows above, the most commonly used algorithms and methods as f
     + Neural Networks (5.28%)
     + Time Series Analysis (5.03%)
 
-An average data scientist is able to the above listed algorithms and methods as basic hard skills to meet the standard industry expectation.
+An average data scientist is able to use the above listed algorithms and methods as basic hard skills to meet the standard industry expectations.
 An exceptional data scientist may be capable of handling 7 to 30 methods and 4 to 15 algorithms.
 
 Furthermore, the most commonly used size of dataset appears to fall in the 1GB ~ 10GB range ( > 50%). For reference, the last graph displays the most used methods by size of dataset. 
@@ -526,7 +635,7 @@ Furthermore, the most commonly used size of dataset appears to fall in the 1GB ~
 <h2>Frequency of Use for Various Tools by Data Scientists</h2>
 
 <div class='well'>
-INTRODUCTION
+In this section, we determine which tools are the most frequently used by a data scientist. Data scientists need tools that will perform data analysis, data warehousing, data visualization and machine learning. We suspect that a typical data scientist uses a multitude of tools to satisfy these components. 
 </div>
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
@@ -616,7 +725,7 @@ ggplot(head(summary.frquency.table,50), aes(x = frequency_id, y = sum_feq, fill 
 ```
 
 <div class='well'>
-CONCLUSION
+The survey reports a wide variety of tools, all of which seemingly address the different needs of a data scientist. Among the top 15 tools, there were a healthy mix of analysis tools, warehousing tools and visualization tools. This indicates that data scientists choose an assortment of tools when addressing tasks. It also indicates a potential overlap in the functionality and features of the tools available. It will be interesting to see how the landscape of tools will evolve as the field of data science matures.
 </div>
 
 ### Work Challenges
@@ -705,15 +814,11 @@ challenges.frequency %>%
 ```
 
 <div class='well'>
-The data shows that data scientists spend a whopping 34% of their time gathering a cleaning data. Almost 25% of their time is spent selecting/building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientists must have superb data cleaning and modeling skills. Data scientists must be able to visually and verbally communicate their findings to stakeholders.
+The data shows that data scientists spend 34% of their time gathering a cleaning data, 25% of their time selecting and building models, and 27% of their time is spent visualizing, discovering, and communicating insights to stakeholders. This is evidence that data scientists must have superb data cleaning and modeling skills. Data scientists must be able to visually and verbally communicate their findings to stakeholders.
 
-Interestingly, dirty data is the most prevalent challenge, at 48%. A staggering 39% of data scientists were challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics. Technical writing skills may aid in drafting proposals for financial support. 31% of respondents reported challenges with data access and availability, therefore advanced data acquisition skills is an for data scientists. 
-
-24% of responders reported issues of unused results from data science projects. This is alarmning, given that data science can be very expensive. Honing communication skills may reduce the proportion of unused results. 
+Accordingly, dirty data is the most prevalent challenge, at 48%. A staggering 39% of data scientists were challenged by issues related to company politics and financial/management support. Interpersonal skills are vital in navigating office politics.
 
 One in four data scientists lack a clear question to answer and a direction to take with the data, one in five data scientists reported challenges of explaining data science to others, and one in seven data scientists reported issues with maintaining reasonable expactations for data science projects. These all speak to communication skills and the ingenuity/creativity to frame questions and problems in such a way that will garner proper responses from stakeholders.
-
-It would have been interesting to investigate the relationship between the rate of unused results and the variables related to communication. However the results were internally randomized and results in the same row may not be from the same responder.
 </div>
 
 ### Conclusion
@@ -725,28 +830,135 @@ It would have been interesting to investigate the relationship between the rate 
 HARD SKILLS
 
 1. can clean, explore, model and visualize data.
-2. can use the most common algorithms (Regression/Logistic Regression, Decision Trees, Random Forests)
-3. can use the most common problem solving methods (Data Visualization, Logistic Regression, Cross-validation)
-4. 
+2. can use the most common algorithms (Regression/Logistic Regression, Decision Trees, Random Forests).
+3. can use the most common problem solving methods (Data Visualization, Logistic Regression, Cross-validation).
+4. can use at least one analysis tool, warehousing tool and visualization tool.
+5. can convey complex information not just visually but verbally as well.
   
 SOFT SKILLS
 
 1. learn from diverse sources.
+2. seek the aid of more experienced data scientists, both in person and on the internet.
 2. continue to learn even after they have secured a job.
-3. have strong verbal and written communication and interpersonal skills.
+3. have strong interpersonal skills.
 4. possess ingenuity and creativity.
-5. 
 
-<div class='well'>
-In conclusion...
+<div class='alert alert-success'>
+In conclusion, there is no single most valuable skill for a data scientist. While our data found broad agreement in a number of areas, we found very few consensus selections. To put it as simply as possible, a data scientist must have a core skill set based on a strong understanding of the fundamental data science concepts but they must also be ready and able to seek new problem solving techniques.
 </div>
 
 <h2>SQL</h2>
 
 <div class='well'>
-The original kaggle data was in an untidy form. As part of data preparation we each created tidy data sub sets and saved them to a series of csv files stored on our [github](https://github.com/brian-cuny/607project3/tree/master/tidied_csv). The following SQL script will import them into a series of tables. We hope that this will aid future research and help to find connections that we may have missed.
+The original kaggle data was in an untidy form. As part of data preparation we each created tidy data subsets and saved them to a series of csv files stored on our [github](https://github.com/brian-cuny/607project3/tree/master/tidied_csv). The following SQL script will import them into a series of tables. We hope that this will aid future research and help to find connections that we may have missed.
 </div>
 
-```{SQL}
-holding
+```{SQL eval=FALSE}
+DROP TABLE IF EXISTS teaching;
+DROP TABLE IF EXISTS algorithm;
+DROP TABLE IF EXISTS method;
+DROP TABLE IF EXISTS tool;
+DROP TABLE IF EXISTS platform;
+DROP TABLE IF EXISTS datascience;
+
+CREATE TABLE datascience (
+  id INTEGER PRIMARY KEY NOT NULL,
+  gender VARCHAR(255) NOT NULL,
+  country VARCHAR(255),
+  age VARCHAR(255)
+  );
+
+LOAD DATA LOCAL INFILE 'data_scientist.csv' 
+INTO TABLE datascience
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(id, gender, @country, @age)
+SET
+country = nullif(@country,'NA'),
+age = nullif(@age,'NA')
+;
+
+CREATE TABLE teaching (
+  id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  ds_id INTEGER NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  percent INTEGER NOT NULL,
+  foreign key(ds_id) references datascience(id)
+  );
+  
+LOAD DATA LOCAL INFILE 'learning_category.csv' 
+INTO TABLE teaching
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(ds_id, category, percent)
+;
+
+
+CREATE TABLE algorithm(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    ds_id INTEGER NOT NULL,
+    algorithm VARCHAR(255) NOT NULL,
+    foreign key(ds_id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE 'algorithms.csv' 
+INTO TABLE algorithm
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(ds_id, algorithm)
+;
+
+CREATE TABLE method(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    ds_id INTEGER NOT NULL,
+    datasetsize VARCHAR(50) NOT NULL,
+    method VARCHAR(255) NOT NULL,
+    frequency VARCHAR(50),
+    foreign key(ds_id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE 'methods.csv' 
+INTO TABLE method
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(ds_id, datasetsize, method, @frequency)
+SET 
+frequency = nullif(@frequency,'NA')
+;
+
+CREATE TABLE tool(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    ds_id INTEGER NOT NULL,
+    tool_name VARCHAR(255) NOT NULL,
+    frequency VARCHAR(255) NOT NULL,
+    foreign key(ds_id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE 'tool_use.csv' 
+INTO TABLE tool
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(ds_id, tool_name, frequency)
+;
+
+CREATE TABLE platform(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    ds_id INTEGER NOT NULL,
+    platform_name VARCHAR(255) NOT NULL,
+    usefulness VARCHAR(100) NOT NULL,
+    foreign key(ds_id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE 'platform_usefulness.csv'
+INTO TABLE platform
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(ds_id, platform_name, usefulness)
+;
 ```
