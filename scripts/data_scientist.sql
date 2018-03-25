@@ -3,6 +3,9 @@ DROP TABLE IF EXISTS algorithm;
 DROP TABLE IF EXISTS method;
 DROP TABLE IF EXISTS tool;
 DROP TABLE IF EXISTS platform;
+DROP TABLE IF EXISTS time;
+DROP TABLE IF EXISTS challenge;
+DROP TABLE IF EXISTS challenge_frequency;
 DROP TABLE IF EXISTS datascience;
 
 CREATE TABLE datascience (
@@ -90,6 +93,55 @@ LINES TERMINATED BY '\n'
 IGNORE 1 ROWS(ds_id, tool_name, frequency)
 ;
 
+CREATE TABLE time(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    activity VARCHAR(50) NOT NULL,
+    time INTEGER NULL,
+    foreign key(id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE '../tidied_csv/time.spent.csv' 
+INTO TABLE time
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(id,activity, @time)
+SET 
+time = nullif(@time,'NA')
+;
+
+CREATE TABLE challenge(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    challenge VARCHAR(50) NULL,
+	foreign key(id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE '../tidied_csv/challenges.csv' 
+INTO TABLE challenge
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(id, @challenge)
+SET 
+challenge = nullif(@challenge,'NA')
+;
+
+CREATE TABLE challenge_frequency(
+    id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    challenge VARCHAR(50) NOT NULL,
+    frequency VARCHAR(50) NULL,
+    foreign key(id) references datascience(id)
+    );
+    
+LOAD DATA LOCAL INFILE '../tidied_csv/challenges.frequency.csv' 
+INTO TABLE challenge_frequency
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS(id,challenge, @frequency)
+SET 
+time = nullif(@frequency,'NA')
+
 CREATE TABLE platform(
     id INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
     ds_id INTEGER NOT NULL,
@@ -104,4 +156,5 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS(ds_id, platform_name, usefulness)
+
 ;
