@@ -17,7 +17,8 @@ library(knitr)
 library(kableExtra)
 library(data.table)
 library(ggplot2)
-library(plotly)
+#library(plotly)
+library(gridExtra)
 library(splitstackshape)
 library(devtools)
 #devtools::install_github("kassambara/easyGgplot2", force = T)
@@ -460,7 +461,7 @@ It is interesting to note that nearly 75% of data scientists indicate they learn
 
 <h2>Common Alogrithms and Methods Used by Data Scientists</h2>
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 data.rose <- raw.data %>%
   select(c(1, 80:81, 134:167))
 
@@ -474,7 +475,7 @@ melt.dt <- data.rose %>%
   gather('WorkMethodsFrequency', 'Frequency', 5:37)
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 alg.select <- melt.dt %>%
   select(c('id', 'WorkAlgorithmsSelect'))
 alg.select.list <- alg.select$WorkAlgorithmsSelect %>%
@@ -484,7 +485,7 @@ alg.select.dt <- tibble(id = rep(alg.select$id, sapply(alg.select.list, length))
 alg.select.dt <- unique(alg.select.dt)
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 method.select <- melt.dt %>%
   select(c('id', 'WorkMethodsSelect'))
 method.select.list <- method.select$WorkMethodsSelect %>%
@@ -495,12 +496,12 @@ method.select.dt <- tibble(id = rep(method.select$id, sapply(method.select.list,
 method.select.dt <- unique(method.select.dt)
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 freq.dt <- melt.dt %>%
   select(c('id', 'WorkDatasetSize', 'WorkMethodsFrequency', 'Frequency'))
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 alg.select.dt <- as.data.table(alg.select.dt)
 alg.total <- nrow(na.omit(alg.select.dt))
 alg.vis <- na.omit(alg.select.dt)[, .(count = length(id)), by = .(algorithm)][order(-count)]
@@ -516,7 +517,7 @@ g.alg <- ggplot(alg.vis, aes(reorder(algorithm, count), count, fill = algorithm)
        y = "count") 
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 method.select.dt <- as.data.table(method.select.dt)
 method.total <- nrow(na.omit(method.select.dt))
 method.vis <- na.omit(method.select.dt)[, .(count = length(id)), by = .(method)][order(-count)]
@@ -532,7 +533,7 @@ g.method <- ggplot(method.vis, aes(reorder(method, count), count, fill = method)
        y = "count") 
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE}
 freq.dt <- as.data.table(freq.dt)
 freq.dt <- freq.dt[, .(count = .N), by = .(Frequency, WorkMethodsFrequency,WorkDatasetSize)]
 freq.total <- nrow(freq.dt)
@@ -542,15 +543,13 @@ method.freq <- freq.dt[, .(count = sum(count)), by = .(WorkMethodsFrequency, Fre
 size.freq <- freq.dt[, .(count = sum(count)), by = .(WorkDatasetSize, Frequency)][order(-count)]
 size.freq <- unique(na.omit(size.freq))
 
-g.size.freq <- ggplotly(ggplot(size.freq, aes(x = Frequency, y = count, 
+g.size.freq <- ggplot(size.freq, aes(x = Frequency, y = count, 
                       fill = WorkDatasetSize)) +
   geom_bar(stat='identity', position=position_fill(reverse=TRUE)) +
   coord_flip() +
   labs(title = "Commonly used size of dataset by frequency (in ratio)",
        x = NULL,
        y = "ratio")
-  )
-  
 ```
 
 ```{r, fig.height=8, echo=FALSE, warning=FALSE, message=FALSE}
@@ -578,25 +577,25 @@ g.method
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10, fig.heigth = 2}
 alg.count <- alg.select.dt[, .(count = length(unique(algorithm))), by = .(id)]
-p1 <- ggplotly(ggplot(alg.count, aes(x = factor(0), count)) +
+p1 <- ggplot(alg.count, aes(x = factor(0), count)) +
   geom_boxplot() + 
   scale_x_discrete(breaks = NULL) +
   xlab(NULL) +
-  coord_flip())
+  coord_flip()
 
 method.count <- method.select.dt[, .(count = length(unique(method))), by = .(id)]
-p2 <- ggplotly(ggplot(method.count, aes(x = factor(0), count)) +
+p2 <- ggplot(method.count, aes(x = factor(0), count)) +
   geom_boxplot() + 
   scale_x_discrete(breaks = NULL) +
   xlab(NULL) +
-  labs(title = "Number of commonly used Algorithms & Methods by data scientist") +
-  coord_flip())
+  labs(title = "Number of commonly used Algorithms & Methods") +
+  coord_flip()
 
-p <- subplot(p1, p2)
-p
+grid.arrange(p1, p2, ncol=2)
+#p <- subplot(p1, p2)
+#p
 # summary(alg.count)
 # summary(method.count)
-
 ```
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE, fig.width = 10}
