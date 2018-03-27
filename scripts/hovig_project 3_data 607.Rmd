@@ -58,7 +58,7 @@ for(i in 3:length(tidy.data)){
 }
 
 total_usefulness<-data.frame(
-  usefulness_name=c("notuseful","veryuseful","somewhatuseful"),
+  usefulness_name=c(rep("notuseful",18),rep("veryuseful",18),rep("somewhatuseful",18)),
   usefulness_count=c(total_notuseful,total_veryuseful,total_somewhatuseful)
   )
 
